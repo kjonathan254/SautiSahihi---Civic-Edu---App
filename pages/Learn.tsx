@@ -1,0 +1,357 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { AppLanguage, TranslationSet, LearnTopic } from '../types.ts';
+import { LEARN_TOPICS } from '../constants.tsx';
+import { generateTopicImage, fetchTTSBuffer, getAudioCtx } from '../geminiService.ts';
+import { hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
+
+interface Props {
+  lang: AppLanguage;
+  t: TranslationSet;
+}
+
+const Learn: React.FC<Props> = ({ lang, t }) => {
+  const [selectedTopic, setSelectedTopic] = useState<LearnTopic | null>(null);
+  const [topicImages, setTopicImages] = useState<Record<string, string>>({});
+  
+  // Audio State
+  const [audioState, setAudioState] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle');
+  // Track audioState in a ref to avoid stale closures and TS narrowing errors in callbacks
+  const audioStateRef = useRef(audioState);
+  useEffect(() => {
+    audioStateRef.current = audioState;
+  }, [audioState]);
+
+  const [playbackProgress, setPlaybackProgress] = useState(0);
+  
+  const audioBufferRef = useRef<AudioBuffer | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const offsetRef = useRef<number>(0);
+  const progressIntervalRef = useRef<number | null>(null);
+
+  const [generatingBadge, setGeneratingBadge] = useState(false);
+  const [badgeImage, setBadgeImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      // Iterate through ALL topics defined in constants to ensure none are missing
+      LEARN_TOPICS.forEach(async (topic) => {
+        try {
+          const img = await generateTopicImage(topic.prompt);
+          setTopicImages(prev => ({ ...prev, [topic.id]: img }));
+        } catch (e) {
+          setTopicImages(prev => ({ 
+            ...prev, 
+            [topic.id]: `https://picsum.photos/seed/${topic.id}/800/450` 
+          }));
+        }
+      });
+    };
+    loadImages();
+
+    return () => stopAudio();
+  }, []);
+
+  const startProgressTracking = () => {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = window.setInterval(() => {
+      // Use ref to check current state in closure
+      if (audioBufferRef.current && audioStateRef.current === 'playing') {
+        const elapsed = getAudioCtx().currentTime - startTimeRef.current + offsetRef.current;
+        const progress = (elapsed / audioBufferRef.current.duration) * 100;
+        setPlaybackProgress(Math.min(progress, 100));
+        if (progress >= 100) stopAudio();
+      }
+    }, 100);
+  };
+
+  const stopProgressTracking = () => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  };
+
+  const playAudio = async (topic: LearnTopic) => {
+    hapticTap();
+    const ctx = getAudioCtx();
+
+    if (audioState === 'paused' && audioBufferRef.current) {
+      const source = ctx.createBufferSource();
+      source.buffer = audioBufferRef.current;
+      source.connect(ctx.destination);
+      // Use audioStateRef to avoid TS narrowing errors and stale closures
+      source.onended = () => { if (audioStateRef.current === 'playing') stopAudio(); };
+      
+      startTimeRef.current = ctx.currentTime;
+      source.start(0, offsetRef.current);
+      audioSourceRef.current = source;
+      setAudioState('playing');
+      startProgressTracking();
+      return;
+    }
+
+    setAudioState('loading');
+    try {
+      const textToSpeak = `${topic.title}. ${topic.detailedContent}`;
+      const buffer = await fetchTTSBuffer(textToSpeak);
+      if (!buffer) throw new Error("No buffer received");
+
+      audioBufferRef.current = buffer;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      // Use audioStateRef to avoid TS narrowing errors and stale closures
+      source.onended = () => { if (audioStateRef.current === 'playing') stopAudio(); };
+
+      startTimeRef.current = ctx.currentTime;
+      offsetRef.current = 0;
+      source.start(0);
+      audioSourceRef.current = source;
+      
+      setAudioState('playing');
+      setPlaybackProgress(0);
+      startProgressTracking();
+      hapticSuccess();
+    } catch (error) {
+      console.error("TTS failed", error);
+      setAudioState('idle');
+      hapticWarning();
+    }
+  };
+
+  const pauseAudio = () => {
+    hapticTap();
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+    }
+    const elapsed = getAudioCtx().currentTime - startTimeRef.current;
+    offsetRef.current += elapsed;
+    setAudioState('paused');
+    stopProgressTracking();
+  };
+
+  const stopAudio = () => {
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+    }
+    offsetRef.current = 0;
+    setAudioState('idle');
+    setPlaybackProgress(0);
+    stopProgressTracking();
+  };
+
+  const handleBack = () => {
+    hapticTap();
+    stopAudio();
+    setSelectedTopic(null);
+    setBadgeImage(null);
+  };
+
+  const generateBadge = async () => {
+    if (!selectedTopic) return;
+    hapticTap();
+    setGeneratingBadge(true);
+    try {
+      const prompt = `A highly detailed gold medal for civic mastery, featuring a Kenyan shield and the SautiSahihi logo. Photorealistic, clean white background.`;
+      const img = await generateTopicImage(prompt);
+      setBadgeImage(img);
+      hapticSuccess();
+    } catch (e) {
+      console.error("Badge generation failed", e);
+    } finally {
+      setGeneratingBadge(false);
+    }
+  };
+
+  if (selectedTopic) {
+    return (
+      <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 pb-24">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-3 text-[#135bec] font-black text-2xl mb-4 p-2 active:bg-blue-50 rounded-xl transition-all"
+        >
+          <span className="material-symbols-outlined text-3xl">arrow_back</span>
+          Back to Academy
+        </button>
+
+        <div className="relative group rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 bg-slate-100">
+          <img
+            src={topicImages[selectedTopic.id] || `https://picsum.photos/seed/${selectedTopic.id}/800/450`}
+            alt={selectedTopic.title}
+            className="w-full h-80 object-cover"
+          />
+          <div className="absolute top-6 left-6 flex gap-3">
+            <div className="bg-[#135bec] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
+              {selectedTopic.category}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-2xl border-2 border-blue-50 dark:border-slate-800 space-y-6">
+          <div className="flex justify-between items-center px-2">
+             <div className="flex items-center gap-3">
+                <div className={`size-3 rounded-full ${audioState === 'playing' ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'}`} />
+                <span className="text-sm font-black uppercase tracking-widest text-slate-500">
+                  {audioState === 'loading' ? 'Preparing Voice...' : 
+                   audioState === 'playing' ? 'Playing Briefing' : 
+                   audioState === 'paused' ? 'Briefing Paused' : 'Audio Briefing Available'}
+                </span>
+             </div>
+             {audioBufferRef.current && (
+               <span className="text-xs font-black text-slate-400">
+                 {Math.round((playbackProgress / 100) * audioBufferRef.current.duration)}s / {Math.round(audioBufferRef.current.duration)}s
+               </span>
+             )}
+          </div>
+          
+          <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+             <div 
+               className="h-full bg-gradient-to-r from-blue-600 to-[#135bec] transition-all duration-300 rounded-full" 
+               style={{ width: `${playbackProgress}%` }}
+             />
+          </div>
+
+          <div className="flex items-center justify-center gap-8 pt-4">
+            <button
+              onClick={stopAudio}
+              disabled={audioState === 'idle'}
+              className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30 border-2 border-transparent"
+            >
+              <span className="material-symbols-outlined text-4xl">stop</span>
+            </button>
+
+            {audioState === 'playing' ? (
+              <button
+                onClick={pauseAudio}
+                className="size-28 rounded-[2.5rem] bg-amber-500 text-white shadow-[0_20px_40px_-10px_rgba(245,158,11,0.5)] flex items-center justify-center active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-7xl">pause</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => playAudio(selectedTopic)}
+                disabled={audioState === 'loading'}
+                className={`size-28 rounded-[2.5rem] text-white shadow-[0_20px_40px_-10px_rgba(19,91,236,0.5)] flex items-center justify-center active:scale-95 transition-all ${
+                  audioState === 'loading' ? 'bg-slate-300 animate-pulse' : 'bg-[#135bec]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-7xl">
+                  {audioState === 'loading' ? 'hourglass_top' : 'play_arrow'}
+                </span>
+              </button>
+            )}
+
+            <button
+              onClick={() => { hapticTap(); stopAudio(); handleBack(); }}
+              className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all border-2 border-transparent"
+            >
+              <span className="material-symbols-outlined text-4xl">close</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="px-4">
+          <h2 className="text-5xl font-black leading-tight tracking-tighter text-gray-900 dark:text-white">
+            {selectedTopic.title}
+          </h2>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-10 rounded-[4rem] shadow-xl border-2 border-gray-50 dark:border-gray-700 space-y-8">
+          <div className="space-y-6">
+             {selectedTopic.detailedContent.split('. ').map((para, i) => (
+               <p key={i} className="text-3xl leading-relaxed font-bold text-gray-800 dark:text-gray-200">
+                 {para}{para.endsWith('.') ? '' : '.'}
+               </p>
+             ))}
+          </div>
+          
+          <div className="p-8 bg-blue-50 dark:bg-blue-900/20 rounded-[3rem] border-l-8 border-[#135bec] flex items-start gap-4">
+            <span className="material-symbols-outlined text-4xl text-[#135bec] filled">lightbulb</span>
+            <div className="space-y-1">
+              <h4 className="font-black text-[#135bec] uppercase text-xs tracking-[0.2em]">Why this matters</h4>
+              <p className="text-xl font-bold italic text-slate-600 dark:text-slate-400">"An informed elder is the guardian of the community."</p>
+            </div>
+          </div>
+
+          {!badgeImage ? (
+            <button 
+              onClick={generateBadge}
+              disabled={generatingBadge}
+              className="w-full py-8 bg-emerald-600 text-white rounded-[3rem] font-black text-3xl shadow-xl active:scale-95 transition-transform border-b-8 border-emerald-800"
+            >
+              {generatingBadge ? 'AWARDING MASTERY...' : 'I UNDERSTAND THIS'}
+            </button>
+          ) : (
+            <div className="animate-in zoom-in duration-700 space-y-6 text-center py-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[3rem] border-2 border-dashed border-emerald-300">
+               <div className="size-56 mx-auto rounded-full overflow-hidden border-8 border-amber-400 shadow-2xl relative">
+                 <img src={badgeImage} alt="Civic Badge" className="w-full h-full object-cover" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+               </div>
+               <div className="space-y-2">
+                 <p className="font-black text-emerald-600 text-3xl tracking-tight uppercase">Mastery Unlocked!</p>
+                 <p className="text-xl font-bold text-slate-500 italic">You are a champion of {selectedTopic.category}</p>
+               </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-10 pb-28">
+      <div className="bg-slate-900 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden">
+        <div className="relative z-10">
+          <h2 className="text-5xl font-black mb-1 tracking-tighter uppercase italic">Civic Academy</h2>
+          <p className="text-2xl opacity-80 font-bold italic text-blue-300">Curated Wisdom for our Elders.</p>
+        </div>
+        <div className="absolute -right-10 -bottom-10 material-symbols-outlined text-[15rem] opacity-5 rotate-12">school</div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-10 px-2">
+        {LEARN_TOPICS.map((topic, idx) => (
+          <div
+            key={topic.id}
+            className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700"
+            style={{ animationDelay: `${idx * 100}ms` }}
+          >
+            <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
+              <img 
+                src={topicImages[topic.id] || `https://picsum.photos/seed/${topic.id}/800/450`} 
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                alt={topic.title} 
+              />
+              <div className="absolute top-6 left-6">
+                <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">
+                  {topic.category}
+                </div>
+              </div>
+            </div>
+            <div className="p-10 space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
+                  {topic.title}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
+                  {topic.summary}
+                </p>
+              </div>
+              <button
+                onClick={() => { hapticTap(); setSelectedTopic(topic); }}
+                className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10"
+              >
+                Read Story
+                <span className="material-symbols-outlined text-3xl">arrow_forward_ios</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Learn;

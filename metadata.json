@@ -1,0 +1,21 @@
+{
+  "name": "SautiSahihi — Civic Edition",
+  "short_name": "SautiSahihi",
+  "description": "An accessible civic platform for Kenyan senior citizens providing AI-powered fact-checking, simplified news, and civic education in multiple local languages.",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/png/128/emoji_u1f5fd.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#135bec",
+  "background_color": "#ffffff",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
