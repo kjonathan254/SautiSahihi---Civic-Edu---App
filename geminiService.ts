@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
@@ -107,8 +108,11 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
   }
 }
 
-export async function generateTopicImage(topic: string): Promise<string> {
-  const cacheKey = `img_${topic.substring(0, 30).replace(/\s/g, '_')}`;
+/**
+ * Generates an image for a specific topic with unique ID caching
+ */
+export async function generateTopicImage(prompt: string, topicId: string): Promise<string> {
+  const cacheKey = `img_topic_${topicId}`;
   const cached = await getFromCache(cacheKey);
   if (cached) return cached;
 
@@ -116,7 +120,7 @@ export async function generateTopicImage(topic: string): Promise<string> {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `A high-resolution, dignified photo of ${topic} in a Kenyan village setting. Professional lighting, photorealistic.` }] },
+      contents: { parts: [{ text: `A high-resolution, dignified photo of: ${prompt}. Focus on Kenyan citizens, professional lighting, photorealistic.` }] },
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
@@ -128,9 +132,10 @@ export async function generateTopicImage(topic: string): Promise<string> {
       }
     }
   } catch (e) {
-    console.warn("AI Image generation failed, falling back to placeholder.");
+    console.warn(`AI Image generation failed for ${topicId}, using seeded placeholder.`, e);
   }
-  return `https://picsum.photos/seed/${encodeURIComponent(topic)}/800/450`;
+  // If AI fails, use a seeded placeholder that is at least consistent for that ID
+  return `https://picsum.photos/seed/kenya_${topicId}/800/450`;
 }
 
 function decode(base64: string) {
@@ -162,6 +167,7 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text }] }],
       config: {
+        // Correcting typo: responseModalities
         responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
       },

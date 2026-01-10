@@ -66,7 +66,8 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
       if (!moodObj) return;
       setIsGeneratingHero(true);
       try {
-        const img = await generateTopicImage(moodObj.prompt);
+        // Passing moodObj.id as the second argument (topicId)
+        const img = await generateTopicImage(moodObj.prompt, moodObj.id);
         setHeroImages(prev => ({ ...prev, [activeMood]: img }));
       } catch (err) {
         console.error("Failed to generate hero image", err);

@@ -34,18 +34,19 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
   useEffect(() => {
     const loadImages = async () => {
-      // Iterate through ALL topics defined in constants to ensure none are missing
-      LEARN_TOPICS.forEach(async (topic) => {
+      // Use sequential loading to prevent API burst issues in production
+      for (const topic of LEARN_TOPICS) {
         try {
-          const img = await generateTopicImage(topic.prompt);
+          const img = await generateTopicImage(topic.prompt, topic.id);
           setTopicImages(prev => ({ ...prev, [topic.id]: img }));
         } catch (e) {
+          console.error(`Failed to load image for ${topic.id}`, e);
           setTopicImages(prev => ({ 
             ...prev, 
-            [topic.id]: `https://picsum.photos/seed/${topic.id}/800/450` 
+            [topic.id]: `https://picsum.photos/seed/kenya_${topic.id}/800/450` 
           }));
         }
-      });
+      }
     };
     loadImages();
 
@@ -156,7 +157,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     setGeneratingBadge(true);
     try {
       const prompt = `A highly detailed gold medal for civic mastery, featuring a Kenyan shield and the SautiSahihi logo. Photorealistic, clean white background.`;
-      const img = await generateTopicImage(prompt);
+      const img = await generateTopicImage(prompt, `badge_${selectedTopic.id}`);
       setBadgeImage(img);
       hapticSuccess();
     } catch (e) {
@@ -167,6 +168,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   };
 
   if (selectedTopic) {
+    const isAiImage = topicImages[selectedTopic.id]?.startsWith('data:image');
     return (
       <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 pb-24">
         <button
@@ -179,14 +181,20 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
         <div className="relative group rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 bg-slate-100">
           <img
-            src={topicImages[selectedTopic.id] || `https://picsum.photos/seed/${selectedTopic.id}/800/450`}
+            src={topicImages[selectedTopic.id] || `https://picsum.photos/seed/kenya_${selectedTopic.id}/800/450`}
             alt={selectedTopic.title}
             className="w-full h-80 object-cover"
           />
-          <div className="absolute top-6 left-6 flex gap-3">
+          <div className="absolute top-6 left-6 flex flex-col gap-2">
             <div className="bg-[#135bec] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
               {selectedTopic.category}
             </div>
+            {isAiImage && (
+              <div className="bg-emerald-500/90 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-2">
+                <span className="material-symbols-outlined text-xs filled">auto_awesome</span>
+                AI Visual
+              </div>
+            )}
           </div>
         </div>
 
@@ -312,43 +320,52 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-10 px-2">
-        {LEARN_TOPICS.map((topic, idx) => (
-          <div
-            key={topic.id}
-            className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700"
-            style={{ animationDelay: `${idx * 100}ms` }}
-          >
-            <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
-              <img 
-                src={topicImages[topic.id] || `https://picsum.photos/seed/${topic.id}/800/450`} 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-                alt={topic.title} 
-              />
-              <div className="absolute top-6 left-6">
-                <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">
-                  {topic.category}
+        {LEARN_TOPICS.map((topic, idx) => {
+          const isAiImage = topicImages[topic.id]?.startsWith('data:image');
+          return (
+            <div
+              key={topic.id}
+              className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
+                <img 
+                  src={topicImages[topic.id] || `https://picsum.photos/seed/kenya_${topic.id}/800/450`} 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                  alt={topic.title} 
+                />
+                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                  <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">
+                    {topic.category}
+                  </div>
+                  {isAiImage && (
+                    <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-1.5 w-fit">
+                      <span className="material-symbols-outlined text-[10px] filled">auto_awesome</span>
+                      AI Visual
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="p-10 space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
-                  {topic.title}
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
-                  {topic.summary}
-                </p>
+              <div className="p-10 space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
+                    {topic.title}
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
+                    {topic.summary}
+                  </p>
+                </div>
+                <button
+                  onClick={() => { hapticTap(); setSelectedTopic(topic); }}
+                  className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10"
+                >
+                  Read Story
+                  <span className="material-symbols-outlined text-3xl">arrow_forward_ios</span>
+                </button>
               </div>
-              <button
-                onClick={() => { hapticTap(); setSelectedTopic(topic); }}
-                className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10"
-              >
-                Read Story
-                <span className="material-symbols-outlined text-3xl">arrow_forward_ios</span>
-              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
