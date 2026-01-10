@@ -15,7 +15,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   
   // Audio State
   const [audioState, setAudioState] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle');
-  // Track audioState in a ref to avoid stale closures and TS narrowing errors in callbacks
   const audioStateRef = useRef(audioState);
   useEffect(() => {
     audioStateRef.current = audioState;
@@ -34,17 +33,15 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
   useEffect(() => {
     const loadImages = async () => {
-      // Use sequential loading to prevent API burst issues in production
+      // Use sequential loading to prevent API burst issues
       for (const topic of LEARN_TOPICS) {
         try {
-          const img = await generateTopicImage(topic.prompt, topic.id);
+          // Pass the hardcoded relevant Unsplash URL as the fallback
+          const img = await generateTopicImage(topic.prompt, topic.id, topic.image);
           setTopicImages(prev => ({ ...prev, [topic.id]: img }));
         } catch (e) {
           console.error(`Failed to load image for ${topic.id}`, e);
-          setTopicImages(prev => ({ 
-            ...prev, 
-            [topic.id]: `https://picsum.photos/seed/kenya_${topic.id}/800/450` 
-          }));
+          setTopicImages(prev => ({ ...prev, [topic.id]: topic.image }));
         }
       }
     };
@@ -56,7 +53,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   const startProgressTracking = () => {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     progressIntervalRef.current = window.setInterval(() => {
-      // Use ref to check current state in closure
       if (audioBufferRef.current && audioStateRef.current === 'playing') {
         const elapsed = getAudioCtx().currentTime - startTimeRef.current + offsetRef.current;
         const progress = (elapsed / audioBufferRef.current.duration) * 100;
@@ -81,7 +77,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
       const source = ctx.createBufferSource();
       source.buffer = audioBufferRef.current;
       source.connect(ctx.destination);
-      // Use audioStateRef to avoid TS narrowing errors and stale closures
       source.onended = () => { if (audioStateRef.current === 'playing') stopAudio(); };
       
       startTimeRef.current = ctx.currentTime;
@@ -102,7 +97,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.connect(ctx.destination);
-      // Use audioStateRef to avoid TS narrowing errors and stale closures
       source.onended = () => { if (audioStateRef.current === 'playing') stopAudio(); };
 
       startTimeRef.current = ctx.currentTime;
@@ -181,7 +175,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
         <div className="relative group rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 bg-slate-100">
           <img
-            src={topicImages[selectedTopic.id] || `https://picsum.photos/seed/kenya_${selectedTopic.id}/800/450`}
+            src={topicImages[selectedTopic.id] || selectedTopic.image}
             alt={selectedTopic.title}
             className="w-full h-80 object-cover"
           />
@@ -223,56 +217,24 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
           </div>
 
           <div className="flex items-center justify-center gap-8 pt-4">
-            <button
-              onClick={stopAudio}
-              disabled={audioState === 'idle'}
-              className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30 border-2 border-transparent"
-            >
-              <span className="material-symbols-outlined text-4xl">stop</span>
-            </button>
-
+            <button onClick={stopAudio} disabled={audioState === 'idle'} className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30 border-2 border-transparent"><span className="material-symbols-outlined text-4xl">stop</span></button>
             {audioState === 'playing' ? (
-              <button
-                onClick={pauseAudio}
-                className="size-28 rounded-[2.5rem] bg-amber-500 text-white shadow-[0_20px_40px_-10px_rgba(245,158,11,0.5)] flex items-center justify-center active:scale-95 transition-all"
-              >
-                <span className="material-symbols-outlined text-7xl">pause</span>
-              </button>
+              <button onClick={pauseAudio} className="size-28 rounded-[2.5rem] bg-amber-500 text-white shadow-[0_20px_40px_-10px_rgba(245,158,11,0.5)] flex items-center justify-center active:scale-95 transition-all"><span className="material-symbols-outlined text-7xl">pause</span></button>
             ) : (
-              <button
-                onClick={() => playAudio(selectedTopic)}
-                disabled={audioState === 'loading'}
-                className={`size-28 rounded-[2.5rem] text-white shadow-[0_20px_40px_-10px_rgba(19,91,236,0.5)] flex items-center justify-center active:scale-95 transition-all ${
-                  audioState === 'loading' ? 'bg-slate-300 animate-pulse' : 'bg-[#135bec]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-7xl">
-                  {audioState === 'loading' ? 'hourglass_top' : 'play_arrow'}
-                </span>
-              </button>
+              <button onClick={() => playAudio(selectedTopic)} disabled={audioState === 'loading'} className={`size-28 rounded-[2.5rem] text-white shadow-[0_20px_40px_-10px_rgba(19,91,236,0.5)] flex items-center justify-center active:scale-95 transition-all ${audioState === 'loading' ? 'bg-slate-300 animate-pulse' : 'bg-[#135bec]'}`}><span className="material-symbols-outlined text-7xl">{audioState === 'loading' ? 'hourglass_top' : 'play_arrow'}</span></button>
             )}
-
-            <button
-              onClick={() => { hapticTap(); stopAudio(); handleBack(); }}
-              className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all border-2 border-transparent"
-            >
-              <span className="material-symbols-outlined text-4xl">close</span>
-            </button>
+            <button onClick={() => { hapticTap(); stopAudio(); handleBack(); }} className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all border-2 border-transparent"><span className="material-symbols-outlined text-4xl">close</span></button>
           </div>
         </div>
 
         <div className="px-4">
-          <h2 className="text-5xl font-black leading-tight tracking-tighter text-gray-900 dark:text-white">
-            {selectedTopic.title}
-          </h2>
+          <h2 className="text-5xl font-black leading-tight tracking-tighter text-gray-900 dark:text-white">{selectedTopic.title}</h2>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-10 rounded-[4rem] shadow-xl border-2 border-gray-50 dark:border-gray-700 space-y-8">
           <div className="space-y-6">
              {selectedTopic.detailedContent.split('. ').map((para, i) => (
-               <p key={i} className="text-3xl leading-relaxed font-bold text-gray-800 dark:text-gray-200">
-                 {para}{para.endsWith('.') ? '' : '.'}
-               </p>
+               <p key={i} className="text-3xl leading-relaxed font-bold text-gray-800 dark:text-gray-200">{para}{para.endsWith('.') ? '' : '.'}</p>
              ))}
           </div>
           
@@ -285,19 +247,10 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
           </div>
 
           {!badgeImage ? (
-            <button 
-              onClick={generateBadge}
-              disabled={generatingBadge}
-              className="w-full py-8 bg-emerald-600 text-white rounded-[3rem] font-black text-3xl shadow-xl active:scale-95 transition-transform border-b-8 border-emerald-800"
-            >
-              {generatingBadge ? 'AWARDING MASTERY...' : 'I UNDERSTAND THIS'}
-            </button>
+            <button onClick={generateBadge} disabled={generatingBadge} className="w-full py-8 bg-emerald-600 text-white rounded-[3rem] font-black text-3xl shadow-xl active:scale-95 transition-transform border-b-8 border-emerald-800">{generatingBadge ? 'AWARDING MASTERY...' : 'I UNDERSTAND THIS'}</button>
           ) : (
             <div className="animate-in zoom-in duration-700 space-y-6 text-center py-6 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[3rem] border-2 border-dashed border-emerald-300">
-               <div className="size-56 mx-auto rounded-full overflow-hidden border-8 border-amber-400 shadow-2xl relative">
-                 <img src={badgeImage} alt="Civic Badge" className="w-full h-full object-cover" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-               </div>
+               <div className="size-56 mx-auto rounded-full overflow-hidden border-8 border-amber-400 shadow-2xl relative"><img src={badgeImage} alt="Civic Badge" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" /></div>
                <div className="space-y-2">
                  <p className="font-black text-emerald-600 text-3xl tracking-tight uppercase">Mastery Unlocked!</p>
                  <p className="text-xl font-bold text-slate-500 italic">You are a champion of {selectedTopic.category}</p>
@@ -323,45 +276,22 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
         {LEARN_TOPICS.map((topic, idx) => {
           const isAiImage = topicImages[topic.id]?.startsWith('data:image');
           return (
-            <div
-              key={topic.id}
-              className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700"
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
+            <div key={topic.id} className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${idx * 100}ms` }}>
               <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
-                <img 
-                  src={topicImages[topic.id] || `https://picsum.photos/seed/kenya_${topic.id}/800/450`} 
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-                  alt={topic.title} 
-                />
+                <img src={topicImages[topic.id] || topic.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={topic.title} />
                 <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">
-                    {topic.category}
-                  </div>
+                  <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">{topic.category}</div>
                   {isAiImage && (
-                    <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-1.5 w-fit">
-                      <span className="material-symbols-outlined text-[10px] filled">auto_awesome</span>
-                      AI Visual
-                    </div>
+                    <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-1.5 w-fit"><span className="material-symbols-outlined text-[10px] filled">auto_awesome</span>AI Visual</div>
                   )}
                 </div>
               </div>
               <div className="p-10 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
-                    {topic.title}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
-                    {topic.summary}
-                  </p>
+                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">{topic.summary}</p>
                 </div>
-                <button
-                  onClick={() => { hapticTap(); setSelectedTopic(topic); }}
-                  className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10"
-                >
-                  Read Story
-                  <span className="material-symbols-outlined text-3xl">arrow_forward_ios</span>
-                </button>
+                <button onClick={() => { hapticTap(); setSelectedTopic(topic); }} className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10">Read Story<span className="material-symbols-outlined text-3xl">arrow_forward_ios</span></button>
               </div>
             </div>
           );

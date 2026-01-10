@@ -1,4 +1,3 @@
-
 export type AppLanguage = 'ENG' | 'KIS' | 'GIK' | 'DHO' | 'LUH';
 export type Language = AppLanguage;
 
@@ -52,6 +51,7 @@ export interface LearnTopic {
   detailedContent: string;
   category: string;
   prompt: string;
+  image: string; // Hardcoded relevant fallback
   lastUpdated: string;
 }
 

@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
@@ -109,9 +108,9 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
 }
 
 /**
- * Generates an image for a specific topic with unique ID caching
+ * Generates an image for a specific topic with unique ID caching and relevant fallback
  */
-export async function generateTopicImage(prompt: string, topicId: string): Promise<string> {
+export async function generateTopicImage(prompt: string, topicId: string, fallbackUrl?: string): Promise<string> {
   const cacheKey = `img_topic_${topicId}`;
   const cached = await getFromCache(cacheKey);
   if (cached) return cached;
@@ -132,10 +131,11 @@ export async function generateTopicImage(prompt: string, topicId: string): Promi
       }
     }
   } catch (e) {
-    console.warn(`AI Image generation failed for ${topicId}, using seeded placeholder.`, e);
+    console.warn(`AI Image generation failed for ${topicId}, using relevant fallback.`);
   }
-  // If AI fails, use a seeded placeholder that is at least consistent for that ID
-  return `https://picsum.photos/seed/kenya_${topicId}/800/450`;
+  
+  // If AI fails, use the provided hardcoded relevant Unsplash URL
+  return fallbackUrl || `https://picsum.photos/seed/kenya_${topicId}/800/450`;
 }
 
 function decode(base64: string) {
@@ -167,7 +167,6 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text }] }],
       config: {
-        // Correcting typo: responseModalities
         responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
       },
