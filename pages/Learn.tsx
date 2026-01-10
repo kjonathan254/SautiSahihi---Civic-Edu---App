@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AppLanguage, TranslationSet, LearnTopic } from '../types.ts';
 import { LEARN_TOPICS } from '../constants.tsx';
 import { generateTopicImage, fetchTTSBuffer, getAudioCtx } from '../geminiService.ts';
@@ -12,6 +12,7 @@ interface Props {
 const Learn: React.FC<Props> = ({ lang, t }) => {
   const [selectedTopic, setSelectedTopic] = useState<LearnTopic | null>(null);
   const [topicImages, setTopicImages] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Audio State
   const [audioState, setAudioState] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle');
@@ -30,6 +31,17 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
   const [generatingBadge, setGeneratingBadge] = useState(false);
   const [badgeImage, setBadgeImage] = useState<string | null>(null);
+
+  // Filter topics based on search
+  const filteredTopics = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return LEARN_TOPICS;
+    return LEARN_TOPICS.filter(topic => 
+      topic.title.toLowerCase().includes(q) || 
+      topic.summary.toLowerCase().includes(q) ||
+      topic.category.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -272,30 +284,68 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
         <div className="absolute -right-10 -bottom-10 material-symbols-outlined text-[15rem] opacity-5 rotate-12">school</div>
       </div>
 
+      {/* SEARCH BAR */}
+      <div className="px-2">
+        <div className="relative group">
+          <span className="absolute left-8 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#135bec] text-4xl">search</span>
+          <input
+            type="text"
+            placeholder="Search for a topic (e.g., KIEMS, Voting)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-20 pr-8 py-8 bg-white dark:bg-gray-800 border-4 border-slate-100 dark:border-gray-700 rounded-[3rem] text-2xl font-black shadow-xl outline-none focus:border-[#135bec] transition-all dark:text-white placeholder:text-slate-300"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => { hapticTap(); setSearchQuery(''); }}
+              className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <span className="material-symbols-outlined text-4xl">cancel</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-10 px-2">
-        {LEARN_TOPICS.map((topic, idx) => {
-          const isAiImage = topicImages[topic.id]?.startsWith('data:image');
-          return (
-            <div key={topic.id} className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${idx * 100}ms` }}>
-              <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
-                <img src={topicImages[topic.id] || topic.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={topic.title} />
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">{topic.category}</div>
-                  {isAiImage && (
-                    <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-1.5 w-fit"><span className="material-symbols-outlined text-[10px] filled">auto_awesome</span>AI Visual</div>
-                  )}
+        {filteredTopics.length > 0 ? (
+          filteredTopics.map((topic, idx) => {
+            const isAiImage = topicImages[topic.id]?.startsWith('data:image');
+            return (
+              <div key={topic.id} className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${idx * 50}ms` }}>
+                <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900">
+                  <img src={topicImages[topic.id] || topic.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={topic.title} />
+                  <div className="absolute top-6 left-6 flex flex-col gap-2">
+                    <div className="bg-white/95 dark:bg-gray-900/95 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#135bec] shadow-xl border border-blue-50">{topic.category}</div>
+                    {isAiImage && (
+                      <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg border border-white/20 flex items-center gap-1.5 w-fit"><span className="material-symbols-outlined text-[10px] filled">auto_awesome</span>AI Visual</div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-10 space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">{topic.summary}</p>
+                  </div>
+                  <button onClick={() => { hapticTap(); setSelectedTopic(topic); }} className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10">Read Story<span className="material-symbols-outlined text-3xl">arrow_forward_ios</span></button>
                 </div>
               </div>
-              <div className="p-10 space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">{topic.summary}</p>
-                </div>
-                <button onClick={() => { hapticTap(); setSelectedTopic(topic); }} className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform border-2 border-[#135bec]/10">Read Story<span className="material-symbols-outlined text-3xl">arrow_forward_ios</span></button>
-              </div>
+            );
+          })
+        ) : (
+          <div className="text-center py-20 px-10 space-y-6 opacity-40">
+            <span className="material-symbols-outlined text-[10rem]">manage_search</span>
+            <div className="space-y-2">
+              <p className="text-3xl font-black uppercase tracking-tight">No topics found</p>
+              <p className="text-xl font-bold italic">Try searching for something else, like "Voter" or "Kit".</p>
             </div>
-          );
-        })}
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="text-[#135bec] font-black text-2xl underline underline-offset-8"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
