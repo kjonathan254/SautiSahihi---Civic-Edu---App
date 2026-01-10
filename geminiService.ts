@@ -2,7 +2,7 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
 
-// Singleton AudioContext to be initialized/resumed on user gesture
+// Singleton AudioContext - Must be resumed on user gesture
 let _audioCtx: AudioContext | null = null;
 
 export const getAudioCtx = () => {
@@ -16,33 +16,25 @@ export const getAudioCtx = () => {
 };
 
 /**
- * Enhanced Error Handler for API issues
+ * Handles common API errors like billing/permission issues
  */
-const handleApiError = (error: any) => {
+const handleApiError = (error: any): string => {
   const msg = error?.message || String(error);
-  console.error("Gemini API Error Details:", error);
-  
-  if (msg.toLowerCase().includes("permission denied") || 
-      msg.toLowerCase().includes("not found") ||
-      msg.toLowerCase().includes("api_key_invalid")) {
-    return "PERMISSION_ERROR";
+  console.error("SautiSahihi API Error:", msg);
+  if (msg.toLowerCase().includes("permission denied") || msg.toLowerCase().includes("not found")) {
+    return "CREDENTIALS_ERROR";
   }
-  return msg;
+  return "GENERAL_ERROR";
 };
 
 export async function factCheckClaim(claim: string, imageBase64?: string, language: AppLanguage = 'ENG'): Promise<FactCheckResult & { groundingLinks?: GroundingLink[] }> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `
-    You are a professional fact-checker for Kenyan citizens, acting as a trusted advisor for seniors.
+    You are a professional fact-checker for Kenyan citizens.
     Fact-check the following claim or image content: "${claim}"
-    Language to respond in: ${language}.
-    
+    Respond in ${language}.
     Ground your verification in the Constitution of Kenya and the Elections Act.
-    Respond in JSON format with:
-    - verdict: "TRUE", "FALSE", or "CAUTION"
-    - summary: A very short (1 sentence) verdict.
-    - explanation: A simple explanation suitable for a senior citizen.
-    - sources: A list of citations or names of sources used.
+    Respond ONLY in JSON format with these keys: verdict (TRUE/FALSE/CAUTION), summary, explanation, sources (array).
   `;
 
   const contents: any = { parts: [{ text: prompt }] };
@@ -75,28 +67,25 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
       }
     });
 
-    // Extract Grounding Links
     const groundingLinks: GroundingLink[] = [];
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (chunks) {
       chunks.forEach((chunk: any) => {
-        if (chunk.web?.uri) {
-          groundingLinks.push({ uri: chunk.web.uri, title: chunk.web.title || "Official Source" });
-        }
+        if (chunk.web?.uri) groundingLinks.push({ uri: chunk.web.uri, title: chunk.web.title || "Reference" });
       });
     }
 
     const result = JSON.parse(response.text || '{}') as FactCheckResult;
     return { ...result, groundingLinks };
   } catch (e) {
-    const errorType = handleApiError(e);
-    if (errorType === "PERMISSION_ERROR") {
+    const errType = handleApiError(e);
+    if (errType === "CREDENTIALS_ERROR") {
       return {
         verdict: Verdict.CAUTION,
-        summary: "API Access Required",
-        explanation: "This feature requires a paid Gemini API key with Google Search access. Please ensure your Vercel API_KEY is from a billing-enabled project.",
-        sources: ["Check settings or billing status."],
-        groundingLinks: [{ uri: "https://ai.google.dev/gemini-api/docs/billing", title: "IEBC / Google Billing Docs" }]
+        summary: "Permission Required",
+        explanation: "This feature (Google Search) requires a Gemini API key from a project with billing enabled. Please check your Vercel/AI Studio environment variables.",
+        sources: ["API Connection Issue"],
+        groundingLinks: [{ uri: "https://ai.google.dev/gemini-api/docs/billing", title: "Billing Guide" }]
       };
     }
     throw e;
@@ -104,42 +93,30 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
 }
 
 export async function getLiveNewsSummary(language: AppLanguage): Promise<string> {
-  const cacheKey = `news_${language}`;
-  if (!navigator.onLine) {
-    const cached = await getFromCache(cacheKey);
-    return cached || "You are offline. Please check your connection.";
-  }
-
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Provide a 2-sentence non-partisan factual update on Kenyan election news for a senior citizen in ${language}.`,
+      contents: `Provide a 2-sentence factual update on Kenyan election news for a senior in ${language}.`,
       config: { tools: [{ googleSearch: {} }] }
     });
-    const result = response.text || "No news found at this moment.";
-    await saveToCache(cacheKey, result);
-    return result;
+    return response.text || "No news found.";
   } catch (err) {
-    const errorType = handleApiError(err);
-    if (errorType === "PERMISSION_ERROR") return "News unavailable: API Key lacks Search access.";
-    const cached = await getFromCache(cacheKey);
-    return cached || "News feed currently updating...";
+    handleApiError(err);
+    return "Official sources are currently being updated. Please check back in a few minutes.";
   }
 }
 
 export async function generateTopicImage(topic: string): Promise<string> {
-  const cacheKey = `img_${topic.substring(0, 50).replace(/\s/g, '_')}`;
-  const cachedImage = await getFromCache(cacheKey);
-  if (cachedImage) return cachedImage;
-
-  if (!navigator.onLine) return `https://picsum.photos/seed/${topic}/800/450`;
+  const cacheKey = `img_${topic.substring(0, 30).replace(/\s/g, '_')}`;
+  const cached = await getFromCache(cacheKey);
+  if (cached) return cached;
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `Dignified image of: ${topic}. Focus on authentic Kenyan citizens, professional lighting, clean background.` }] },
+      contents: { parts: [{ text: `A high-resolution, dignified photo of ${topic} in a Kenyan village setting. Professional lighting, photorealistic.` }] },
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
@@ -151,9 +128,9 @@ export async function generateTopicImage(topic: string): Promise<string> {
       }
     }
   } catch (e) {
-    console.error("Image generation failed:", e);
+    console.warn("AI Image generation failed, falling back to placeholder.");
   }
-  return `https://picsum.photos/seed/${topic}/800/450`;
+  return `https://picsum.photos/seed/${encodeURIComponent(topic)}/800/450`;
 }
 
 function decode(base64: string) {
@@ -194,14 +171,14 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
     if (!base64Audio) return null;
     return await decodeAudioData(decode(base64Audio), getAudioCtx(), 24000, 1);
   } catch (e) {
-    console.error("TTS generation failed:", e);
+    console.error("Voice synthesis failed:", e);
     return null;
   }
 }
 
-export async function speakText(text: string, voice: string = 'Kore'): Promise<void> {
-  const ctx = getAudioCtx(); // Resumes on click
-  const audioBuffer = await fetchTTSBuffer(text, voice);
+export async function speakText(text: string): Promise<void> {
+  const ctx = getAudioCtx(); 
+  const audioBuffer = await fetchTTSBuffer(text);
   if (!audioBuffer) return;
 
   return new Promise((resolve) => {
@@ -213,20 +190,14 @@ export async function speakText(text: string, voice: string = 'Kore'): Promise<v
   });
 }
 
-export async function chatAssistant(message: string, language: AppLanguage, history: {role: string, text: string}[] = []): Promise<{text: string, links: GroundingLink[]}> {
+export async function chatAssistant(message: string, language: AppLanguage, history: any[] = []): Promise<{text: string, links: GroundingLink[]}> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `You are SautiSahihi Civic Guide for Kenyan seniors. Respond in ${language}. Be patient and respectful.`;
+  const systemInstruction = `You are SautiSahihi Civic Guide for Kenyan seniors. Respond in ${language}. Use Google Search.`;
   
-  const contents = history.map(h => ({
-    role: h.role === 'ai' ? 'model' : 'user',
-    parts: [{ text: h.text }]
-  }));
-  contents.push({ role: 'user', parts: [{ text: message }] });
-
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: contents,
+      contents: [...history, { role: 'user', parts: [{ text: message }] }],
       config: { systemInstruction, tools: [{ googleSearch: {} }] }
     });
 
@@ -238,10 +209,10 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
       });
     }
 
-    return { text: response.text || "I couldn't find an answer. Please try again.", links };
+    return { text: response.text || "I am processing your request...", links };
   } catch (e) {
-    const errorType = handleApiError(e);
-    if (errorType === "PERMISSION_ERROR") return { text: "I need search permissions to answer this. Update your key in Settings.", links: [] };
-    return { text: "Pole, I am having trouble connecting right now.", links: [] };
+    const errType = handleApiError(e);
+    if (errType === "CREDENTIALS_ERROR") return { text: "I need search permissions to answer this accurately. Please check your project billing status.", links: [] };
+    return { text: "Pole, I am currently having trouble connecting. Please try again in a few moments.", links: [] };
   }
 }
