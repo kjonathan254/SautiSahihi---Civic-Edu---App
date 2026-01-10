@@ -123,7 +123,6 @@ export const CIVIC_FAQS: Record<AppLanguage, { q: string, a: string }[]> = {
 
 /**
  * THE SAUTISAHIHI MASTER BLUEPRINT: COMPREHENSIVE IEBC PHYSICAL REGISTRY
- * All 47 Counties and Constituencies Verified.
  */
 export const IEBC_OFFICES: IEBCOffice[] = [
   // MOMBASA COUNTY

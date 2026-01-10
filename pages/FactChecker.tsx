@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { AppLanguage, TranslationSet, FactCheckResult, Verdict } from '../types.ts';
+import { AppLanguage, TranslationSet, FactCheckResult, Verdict, GroundingLink } from '../types.ts';
 import { factCheckClaim, speakText } from '../geminiService.ts';
 import { fileToBase64, hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
 
@@ -10,9 +9,10 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
   const [claim, setClaim] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<FactCheckResult | null>(null);
+  const [result, setResult] = useState<(FactCheckResult & { groundingLinks?: GroundingLink[] }) | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,6 +42,7 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
     hapticTap();
     setLoading(true);
     setResult(null);
+    setError(null);
     try {
       const res = await factCheckClaim(claim, image || undefined, lang);
       setResult(res);
@@ -49,6 +50,8 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
       else hapticWarning();
     } catch (err) {
       console.error(err);
+      setError("We couldn't verify this right now. Please check your internet or API settings.");
+      hapticWarning();
     } finally {
       setLoading(false);
     }
@@ -105,6 +108,12 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
           </button>
         </div>
 
+        {error && (
+          <div className="p-4 bg-red-50 border-2 border-red-200 text-red-700 rounded-2xl font-bold text-sm">
+            {error}
+          </div>
+        )}
+
         <button
           onClick={handleCheck}
           disabled={loading || (!claim && !image)}
@@ -129,7 +138,7 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
             <div className="flex justify-end mb-4">
                <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-black/10">
                   <span className="material-symbols-outlined text-xs text-blue-600 filled">verified</span>
-                  <span className="text-[8px] font-black uppercase text-gray-500 tracking-widest">Grounding: ELOG Official Data</span>
+                  <span className="text-[8px] font-black uppercase text-gray-500 tracking-widest">Live Grounding Enabled</span>
                </div>
             </div>
 
@@ -156,6 +165,20 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
                   Listen to Explanation
                 </button>
               </div>
+
+              {result.groundingLinks && result.groundingLinks.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-black uppercase text-[10px] text-gray-400 tracking-widest px-2">Verified Web Sources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.groundingLinks.map((link, idx) => (
+                      <a key={idx} href={link.uri} target="_blank" rel="noopener noreferrer" className="bg-white px-4 py-2 rounded-full text-xs font-bold text-blue-600 shadow-sm border border-blue-50 hover:bg-blue-50 transition-colors flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm">link</span>
+                        {link.title}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">

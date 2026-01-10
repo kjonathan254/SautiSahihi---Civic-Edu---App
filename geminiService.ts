@@ -1,12 +1,10 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Verdict, FactCheckResult, AppLanguage } from './types.ts';
+import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-// Singleton AudioContext to prevent lag and context overhead
+// Singleton AudioContext to be initialized/resumed on user gesture
 let _audioCtx: AudioContext | null = null;
+
 export const getAudioCtx = () => {
   if (!_audioCtx) {
     _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -22,13 +20,17 @@ export const getAudioCtx = () => {
  */
 const handleApiError = (error: any) => {
   const msg = error?.message || String(error);
-  if (msg.toLowerCase().includes("permission denied") || msg.toLowerCase().includes("requested entity was not found")) {
+  console.error("Gemini API Error Details:", error);
+  
+  if (msg.toLowerCase().includes("permission denied") || 
+      msg.toLowerCase().includes("not found") ||
+      msg.toLowerCase().includes("api_key_invalid")) {
     return "PERMISSION_ERROR";
   }
   return msg;
 };
 
-export async function factCheckClaim(claim: string, imageBase64?: string, language: AppLanguage = 'ENG'): Promise<FactCheckResult> {
+export async function factCheckClaim(claim: string, imageBase64?: string, language: AppLanguage = 'ENG'): Promise<FactCheckResult & { groundingLinks?: GroundingLink[] }> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `
     You are a professional fact-checker for Kenyan citizens, acting as a trusted advisor for seniors.
@@ -40,7 +42,7 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
     - verdict: "TRUE", "FALSE", or "CAUTION"
     - summary: A very short (1 sentence) verdict.
     - explanation: A simple explanation suitable for a senior citizen.
-    - sources: A list of verified URLs or legal citations (e.g., Article X of Constitution).
+    - sources: A list of citations or names of sources used.
   `;
 
   const contents: any = { parts: [{ text: prompt }] };
@@ -73,24 +75,31 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
       }
     });
 
-    const text = response.text || '{}';
-    return JSON.parse(text) as FactCheckResult;
+    // Extract Grounding Links
+    const groundingLinks: GroundingLink[] = [];
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (chunks) {
+      chunks.forEach((chunk: any) => {
+        if (chunk.web?.uri) {
+          groundingLinks.push({ uri: chunk.web.uri, title: chunk.web.title || "Official Source" });
+        }
+      });
+    }
+
+    const result = JSON.parse(response.text || '{}') as FactCheckResult;
+    return { ...result, groundingLinks };
   } catch (e) {
     const errorType = handleApiError(e);
     if (errorType === "PERMISSION_ERROR") {
       return {
         verdict: Verdict.CAUTION,
-        summary: "API Key Permission Error",
-        explanation: "Your current API key does not have access to Google Search or Gemini 3 models. Please refresh your API key in settings and ensure it is from a paid Google Cloud project.",
-        sources: ["https://ai.google.dev/gemini-api/docs/billing"]
+        summary: "API Access Required",
+        explanation: "This feature requires a paid Gemini API key with Google Search access. Please ensure your Vercel API_KEY is from a billing-enabled project.",
+        sources: ["Check settings or billing status."],
+        groundingLinks: [{ uri: "https://ai.google.dev/gemini-api/docs/billing", title: "IEBC / Google Billing Docs" }]
       };
     }
-    return {
-      verdict: Verdict.CAUTION,
-      summary: "Verification failed.",
-      explanation: "We couldn't reach our fact-checking engine. Please try again later.",
-      sources: []
-    };
+    throw e;
   }
 }
 
@@ -98,26 +107,24 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
   const cacheKey = `news_${language}`;
   if (!navigator.onLine) {
     const cached = await getFromCache(cacheKey);
-    return cached || "You are offline.";
+    return cached || "You are offline. Please check your connection.";
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Summarize the top 3 latest Kenyan political news stories for a senior citizen in ${language}. Keep it strictly factual.`,
+      contents: `Provide a 2-sentence non-partisan factual update on Kenyan election news for a senior citizen in ${language}.`,
       config: { tools: [{ googleSearch: {} }] }
     });
-    const result = response.text || "No news found.";
+    const result = response.text || "No news found at this moment.";
     await saveToCache(cacheKey, result);
     return result;
   } catch (err) {
     const errorType = handleApiError(err);
-    if (errorType === "PERMISSION_ERROR") {
-      return "ERROR: Permission Denied. Your API key lacks Google Search permissions. Please update your key in Settings.";
-    }
+    if (errorType === "PERMISSION_ERROR") return "News unavailable: API Key lacks Search access.";
     const cached = await getFromCache(cacheKey);
-    return cached || "News currently unavailable.";
+    return cached || "News feed currently updating...";
   }
 }
 
@@ -132,7 +139,7 @@ export async function generateTopicImage(topic: string): Promise<string> {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `Dignified image of: ${topic}. Focus on Kenyan citizens, authentic tones, professional lighting.` }] },
+      contents: { parts: [{ text: `Dignified image of: ${topic}. Focus on authentic Kenyan citizens, professional lighting, clean background.` }] },
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
@@ -143,7 +150,9 @@ export async function generateTopicImage(topic: string): Promise<string> {
         return base64;
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Image generation failed:", e);
+  }
   return `https://picsum.photos/seed/${topic}/800/450`;
 }
 
@@ -185,15 +194,16 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
     if (!base64Audio) return null;
     return await decodeAudioData(decode(base64Audio), getAudioCtx(), 24000, 1);
   } catch (e) {
+    console.error("TTS generation failed:", e);
     return null;
   }
 }
 
 export async function speakText(text: string, voice: string = 'Kore'): Promise<void> {
+  const ctx = getAudioCtx(); // Resumes on click
   const audioBuffer = await fetchTTSBuffer(text, voice);
   if (!audioBuffer) return;
 
-  const ctx = getAudioCtx();
   return new Promise((resolve) => {
     const source = ctx.createBufferSource();
     source.buffer = audioBuffer;
@@ -203,7 +213,7 @@ export async function speakText(text: string, voice: string = 'Kore'): Promise<v
   });
 }
 
-export async function chatAssistant(message: string, language: AppLanguage, history: {role: string, text: string}[] = []): Promise<string> {
+export async function chatAssistant(message: string, language: AppLanguage, history: {role: string, text: string}[] = []): Promise<{text: string, links: GroundingLink[]}> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `You are SautiSahihi Civic Guide for Kenyan seniors. Respond in ${language}. Be patient and respectful.`;
   
@@ -219,10 +229,19 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
       contents: contents,
       config: { systemInstruction, tools: [{ googleSearch: {} }] }
     });
-    return response.text || "Error processing request.";
+
+    const links: GroundingLink[] = [];
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (chunks) {
+      chunks.forEach((chunk: any) => {
+        if (chunk.web?.uri) links.push({ uri: chunk.web.uri, title: chunk.web.title || "Reference" });
+      });
+    }
+
+    return { text: response.text || "I couldn't find an answer. Please try again.", links };
   } catch (e) {
     const errorType = handleApiError(e);
-    if (errorType === "PERMISSION_ERROR") return "ERROR: Permission Denied. Your API key lacks advanced permissions. Update your key in Settings.";
-    return "Pole, connection error. Please try again.";
+    if (errorType === "PERMISSION_ERROR") return { text: "I need search permissions to answer this. Update your key in Settings.", links: [] };
+    return { text: "Pole, I am having trouble connecting right now.", links: [] };
   }
 }
