@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppLanguage, TranslationSet, GroundingLink } from '../types.ts';
 import { chatAssistant } from '../geminiService.ts';
+import { translateToKiswahili } from '../hfService.ts';
 import { hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
-import { IEBC_HQ_INFO, CIVIC_FAQS } from '../constants.tsx';
+import { CIVIC_FAQS } from '../constants.tsx';
+import { useSpeechToText } from '../useSpeechToText.ts';
 
 interface Props {
   lang: AppLanguage;
@@ -12,7 +14,9 @@ interface Props {
 interface Message {
   role: 'user' | 'ai';
   text: string;
+  originalText?: string;
   links?: GroundingLink[];
+  isTranslated?: boolean;
 }
 
 const Assistant: React.FC<Props> = ({ lang, t }) => {
@@ -21,7 +25,6 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +72,41 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
     }
   };
 
+  const toggleTranslation = async (index: number) => {
+    const msg = messages[index];
+    if (msg.role !== 'ai' || loading) return;
+    hapticTap();
+
+    const newMessages = [...messages];
+    if (msg.isTranslated && msg.originalText) {
+      // Revert to original
+      newMessages[index] = { ...msg, text: msg.originalText, isTranslated: false };
+      setMessages(newMessages);
+    } else {
+      // Translate using Hugging Face
+      setLoading(true);
+      try {
+        const swahiliText = await translateToKiswahili(msg.text);
+        newMessages[index] = { 
+          ...msg, 
+          originalText: msg.text, 
+          text: swahiliText, 
+          isTranslated: true 
+        };
+        setMessages(newMessages);
+        hapticSuccess();
+      } catch (e) {
+        hapticWarning();
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const { isListening, isSupported, startListening } = useSpeechToText(lang, (transcript) => {
+    handleSend(transcript);
+  });
+
   const handleFaqClick = (faq: { q: string, a: string }) => {
     hapticTap();
     setMessages(prev => [
@@ -77,21 +115,6 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
       { role: 'ai', text: faq.a }
     ]);
     hapticSuccess();
-  };
-
-  const handleVoiceInput = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    recognition.lang = lang === 'ENG' ? 'en-KE' : 'sw-KE';
-    recognition.onstart = () => { setIsListening(true); hapticTap(); };
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      handleSend(transcript);
-    };
-    recognition.onerror = () => { hapticWarning(); setIsListening(false); };
-    recognition.onend = () => setIsListening(false);
-    recognition.start();
   };
 
   const faqs = CIVIC_FAQS[lang] || CIVIC_FAQS['ENG'];
@@ -125,10 +148,23 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
                 <span className="material-symbols-outlined text-slate-500 text-xl filled">face</span>
               </div>
             )}
-            <div className={`max-w-[85%] p-6 rounded-[2.5rem] text-lg shadow-md ${
+            <div className={`relative max-w-[85%] p-6 rounded-[2.5rem] text-lg shadow-md ${
               m.role === 'user' ? 'bg-[#135bec] text-white rounded-br-none font-bold' : 'bg-white dark:bg-slate-800 dark:text-white border-2 border-slate-50 rounded-bl-none'
             }`}>
               <p className="whitespace-pre-wrap">{m.text}</p>
+              
+              {m.role === 'ai' && (
+                <button 
+                  onClick={() => toggleTranslation(i)}
+                  className={`mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    m.isTranslated ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-600'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-sm">translate</span>
+                  {m.isTranslated ? 'Show Original' : 'Translate to Swahili'}
+                </button>
+              )}
+
               {m.links && m.links.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-2">
                   {m.links.map((link, idx) => (
@@ -161,9 +197,11 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
       </div>
 
       <div className="p-3 bg-white dark:bg-gray-900 border-t-2 border-gray-100 flex gap-2 items-center sticky bottom-0 z-20 mx-2 mb-2 rounded-[3rem] shadow-2xl">
-        <button onClick={handleVoiceInput} className="bg-slate-100 dark:bg-gray-800 text-[#135bec] size-16 rounded-full flex items-center justify-center active:scale-90 transition-transform">
-          <span className="material-symbols-outlined text-4xl">mic</span>
-        </button>
+        {isSupported && (
+          <button onClick={startListening} className={`size-16 rounded-full flex items-center justify-center active:scale-90 transition-all ${isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-gray-800 text-[#135bec]'}`}>
+            <span className="material-symbols-outlined text-4xl">{isListening ? 'graphic_eq' : 'mic'}</span>
+          </button>
+        )}
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

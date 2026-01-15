@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
+import { generateHFImage } from './hfService.ts';
 
 // Singleton AudioContext - Must be resumed on user gesture
 let _audioCtx: AudioContext | null = null;
@@ -49,7 +50,7 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: 'gemini-3-pro-preview', // Pro for search grounding
       contents: contents,
       config: {
         tools: [{ googleSearch: {} }],
@@ -108,33 +109,63 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
 }
 
 /**
- * Generates an image for a specific topic with unique ID caching and relevant fallback
+ * SMART CONTEXT-AWARE IMAGE ORCHESTRATOR
+ * Tries: Gemini -> Hugging Face -> Hardcoded Local Fallback
+ * 
+ * prompt: The base topic name
+ * context: The actual text describing the topic (for prompt enrichment)
  */
-export async function generateTopicImage(prompt: string, topicId: string, fallbackUrl?: string): Promise<string> {
+export async function generateTopicImage(prompt: string, topicId: string, context?: string, fallbackUrl?: string): Promise<string> {
   const cacheKey = `img_topic_${topicId}`;
+  
+  // 0. Check Offline Cache
   const cached = await getFromCache(cacheKey);
   if (cached) return cached;
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // 1. Prompt Enrichment (Understanding Context)
+  let enrichedPrompt = `A high-quality, photorealistic Kenyan civic scene: ${prompt}`;
   try {
+    if (context) {
+      const aiPromptRefiner = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const refinement = await aiPromptRefiner.models.generateContent({
+        model: 'gemini-3-flash-preview', // Use fast model for prompt expansion
+        contents: `Based on this text: "${context}", write a 1-sentence highly descriptive image generation prompt for a photorealistic scene in Kenya. Focus on dignity and clarity.`
+      });
+      if (refinement.text) enrichedPrompt = refinement.text;
+    }
+  } catch (refinementError) {
+    console.warn("Prompt enrichment failed, using base prompt.");
+  }
+
+  // 2. Try Gemini Image Generation
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `A high-resolution, dignified photo of: ${prompt}. Focus on Kenyan citizens, professional lighting, photorealistic.` }] },
+      contents: { parts: [{ text: `${enrichedPrompt}. Cinematic lighting, 4k resolution, culturally respectful.` }] },
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        const base64 = `data:image/png;base64,${part.inlineData.data}`;
-        await saveToCache(cacheKey, base64);
-        return base64;
-      }
+    const imgPart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    if (imgPart?.inlineData) {
+      const b64 = `data:image/png;base64,${imgPart.inlineData.data}`;
+      await saveToCache(cacheKey, b64);
+      return b64;
     }
-  } catch (e) {
-    console.warn(`AI Image generation failed for ${topicId}, using relevant fallback.`);
+  } catch (geminiError) {
+    console.warn(`Gemini image failed for ${topicId}. Trying Hugging Face fallback...`);
+  }
+    
+  // 3. Try Hugging Face Fallback (FLUX.1-schnell)
+  try {
+    const hfBase64 = await generateHFImage(enrichedPrompt);
+    await saveToCache(cacheKey, hfBase64);
+    return hfBase64;
+  } catch (hfError) {
+    console.warn(`Hugging Face also unavailable for ${topicId}. Using static fallback.`);
   }
   
-  // If AI fails, use the provided hardcoded relevant Unsplash URL
+  // 4. Final Fallback (Reliable static asset)
   return fallbackUrl || `https://picsum.photos/seed/kenya_${topicId}/800/450`;
 }
 
@@ -186,10 +217,10 @@ export async function speakText(text: string): Promise<void> {
   const audioBuffer = await fetchTTSBuffer(text);
   if (!audioBuffer) return;
 
+  const source = ctx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(ctx.destination);
   return new Promise((resolve) => {
-    const source = ctx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(ctx.destination);
     source.onended = () => resolve();
     source.start();
   });

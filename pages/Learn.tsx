@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AppLanguage, TranslationSet, LearnTopic } from '../types.ts';
 import { LEARN_TOPICS } from '../constants.tsx';
 import { generateTopicImage, fetchTTSBuffer, getAudioCtx } from '../geminiService.ts';
+import { generateHFImage } from '../hfService.ts';
 import { hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
 
 interface Props {
@@ -14,6 +15,11 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   const [topicImages, setTopicImages] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Custom Poster State (Hugging Face)
+  const [posterPrompt, setPosterPrompt] = useState('');
+  const [generatedPoster, setGeneratedPoster] = useState<string | null>(null);
+  const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
+
   // Audio State
   const [audioState, setAudioState] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle');
   const audioStateRef = useRef(audioState);
@@ -45,22 +51,37 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
   useEffect(() => {
     const loadImages = async () => {
-      // Use sequential loading to prevent API burst issues
       for (const topic of LEARN_TOPICS) {
         try {
-          // Pass the hardcoded relevant Unsplash URL as the fallback
-          const img = await generateTopicImage(topic.prompt, topic.id, topic.image);
+          // Passing topic.detailedContent as context for better prompt generation
+          const img = await generateTopicImage(topic.prompt, topic.id, topic.detailedContent, topic.image);
           setTopicImages(prev => ({ ...prev, [topic.id]: img }));
         } catch (e) {
-          console.error(`Failed to load image for ${topic.id}`, e);
           setTopicImages(prev => ({ ...prev, [topic.id]: topic.image }));
         }
       }
     };
     loadImages();
-
     return () => stopAudio();
   }, []);
+
+  const handleCreatePoster = async () => {
+    if (!posterPrompt.trim()) return;
+    hapticTap();
+    setIsGeneratingPoster(true);
+    setGeneratedPoster(null);
+    try {
+      const fullPrompt = `A high-quality, photorealistic civic poster for Kenya: ${posterPrompt}. Dignified, cinematic lighting, sharp details.`;
+      const imageUrl = await generateHFImage(fullPrompt);
+      setGeneratedPoster(imageUrl);
+      hapticSuccess();
+    } catch (e) {
+      console.error(e);
+      hapticWarning();
+    } finally {
+      setIsGeneratingPoster(false);
+    }
+  };
 
   const startProgressTracking = () => {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
@@ -121,7 +142,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
       startProgressTracking();
       hapticSuccess();
     } catch (error) {
-      console.error("TTS failed", error);
       setAudioState('idle');
       hapticWarning();
     }
@@ -163,7 +183,8 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     setGeneratingBadge(true);
     try {
       const prompt = `A highly detailed gold medal for civic mastery, featuring a Kenyan shield and the SautiSahihi logo. Photorealistic, clean white background.`;
-      const img = await generateTopicImage(prompt, `badge_${selectedTopic.id}`);
+      // Pass category context for badge refinement
+      const img = await generateTopicImage(prompt, `badge_${selectedTopic.id}`, `A mastery badge for ${selectedTopic.category}`);
       setBadgeImage(img);
       hapticSuccess();
     } catch (e) {
@@ -303,6 +324,46 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
               <span className="material-symbols-outlined text-4xl">cancel</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Hugging Face Poster Studio */}
+      <div className="bg-emerald-950 p-10 rounded-[4rem] text-white shadow-2xl border-4 border-emerald-500/20">
+        <div className="flex items-center gap-4 mb-6">
+           <div className="bg-emerald-600 p-3 rounded-2xl"><span className="material-symbols-outlined text-3xl filled">palette</span></div>
+           <div>
+              <h3 className="text-3xl font-black tracking-tight uppercase">Civic Poster Studio</h3>
+              <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Powered by Hugging Face FLUX</p>
+           </div>
+        </div>
+        
+        <div className="space-y-4">
+           <textarea 
+             value={posterPrompt}
+             onChange={(e) => setPosterPrompt(e.target.value)}
+             placeholder="Describe a poster (e.g., Peaceful voting in Kisumu at sunset)..."
+             className="w-full p-6 bg-emerald-900/50 border-2 border-emerald-700/50 rounded-[2.5rem] text-xl font-bold text-white placeholder:text-emerald-700 outline-none focus:border-emerald-500 h-32"
+           />
+           <button 
+             onClick={handleCreatePoster}
+             disabled={isGeneratingPoster || !posterPrompt}
+             className="w-full py-6 bg-emerald-600 text-white rounded-[2.5rem] font-black text-2xl shadow-xl active:scale-95 transition-all border-b-8 border-emerald-800 flex items-center justify-center gap-3"
+           >
+             {isGeneratingPoster ? (
+               <><div className="size-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div> CREATING POSTER...</>
+             ) : (
+               <><span className="material-symbols-outlined">auto_awesome</span> GENERATE POSTER</>
+             )}
+           </button>
+
+           {generatedPoster && (
+             <div className="mt-8 animate-in zoom-in duration-500 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl">
+                <img src={generatedPoster} alt="HF Generated Poster" className="w-full aspect-video object-cover" />
+                <div className="bg-white p-4 text-center">
+                  <p className="text-emerald-900 font-black text-xs uppercase tracking-widest">Share this vision with your community</p>
+                </div>
+             </div>
+           )}
         </div>
       </div>
 
