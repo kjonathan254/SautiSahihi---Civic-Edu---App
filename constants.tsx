@@ -103,6 +103,16 @@ export const LEARN_TOPICS: LearnTopic[] = [
     prompt: "Two Kenyan elders of different backgrounds sharing a handshake of peace in a sunlit village." 
   },
   { 
+    id: 'dates-2027', 
+    title: 'Key Election Dates 2027', 
+    summary: 'Important milestones leading to the next General Election.', 
+    detailedContent: 'Preparation for the next General Election involves several critical dates. Continuous voter registration will peak in 2026 and early 2027. Political parties will hold their primaries to pick candidates between February and May 2027. The big day, the General Election, is legally set for the second Tuesday of August 2027. Knowing these dates helps you plan your travel and ensure your voice is heard.',
+    category: 'Dates', 
+    lastUpdated: 'May 2024',
+    image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=800",
+    prompt: "A dignified Kenyan desktop calendar for 2027, with August 10th circled in bright red. Next to it is a Kenyan ID card and a pair of reading glasses on a polished wooden table." 
+  },
+  { 
     id: 'reg-2026', 
     title: 'Voter Registration 2026', 
     summary: 'Important dates for the continuous registration cycle.', 
