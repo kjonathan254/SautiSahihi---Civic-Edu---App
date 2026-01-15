@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
@@ -192,12 +193,24 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   return buffer;
 }
 
-export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Promise<AudioBuffer | null> {
+export async function fetchTTSBuffer(text: string, language: AppLanguage = 'ENG', voice: string = 'Kore'): Promise<AudioBuffer | null> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // Map languages to descriptive prompts for better pronunciation
+  const langMap: Record<AppLanguage, string> = {
+    ENG: "English",
+    KIS: "Kiswahili",
+    GIK: "Gikuyu",
+    DHO: "Dholuo",
+    LUH: "Luhya"
+  };
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ role: 'user', parts: [{ text }] }],
+      contents: [{ 
+        role: 'user', 
+        parts: [{ text: `Speak clearly and at a respectful, moderate pace for an elder in ${langMap[language] || 'English'}: ${text}` }] 
+      }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
@@ -213,9 +226,9 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
   }
 }
 
-export async function speakText(text: string): Promise<void> {
+export async function speakText(text: string, language: AppLanguage = 'ENG'): Promise<void> {
   const ctx = getAudioCtx(); 
-  const audioBuffer = await fetchTTSBuffer(text);
+  const audioBuffer = await fetchTTSBuffer(text, language);
   if (!audioBuffer) return;
 
   const source = ctx.createBufferSource();
@@ -251,6 +264,7 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (chunks) {
       chunks.forEach((chunk: any) => {
+        // Fix: Changed groundingLinks.push to links.push as 'links' is the correct defined variable for this scope
         if (chunk.web?.uri) links.push({ uri: chunk.web.uri, title: chunk.web.title || "Reference" });
       });
     }

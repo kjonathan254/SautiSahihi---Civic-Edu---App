@@ -53,7 +53,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     const loadImages = async () => {
       for (const topic of LEARN_TOPICS) {
         try {
-          // Passing topic.detailedContent as context for better prompt generation
           const img = await generateTopicImage(topic.prompt, topic.id, topic.detailedContent, topic.image);
           setTopicImages(prev => ({ ...prev, [topic.id]: img }));
         } catch (e) {
@@ -123,7 +122,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     setAudioState('loading');
     try {
       const textToSpeak = `${topic.title}. ${topic.detailedContent}`;
-      const buffer = await fetchTTSBuffer(textToSpeak);
+      const buffer = await fetchTTSBuffer(textToSpeak, lang);
       if (!buffer) throw new Error("No buffer received");
 
       audioBufferRef.current = buffer;
@@ -159,6 +158,41 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     stopProgressTracking();
   };
 
+  const skipAudio = (seconds: number) => {
+    if (!audioBufferRef.current) return;
+    hapticTap();
+    
+    // Stop current source
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+    }
+
+    // Calculate new offset
+    const currentElapsed = audioState === 'playing' 
+      ? getAudioCtx().currentTime - startTimeRef.current + offsetRef.current
+      : offsetRef.current;
+    
+    const newOffset = Math.max(0, Math.min(currentElapsed + seconds, audioBufferRef.current.duration));
+    offsetRef.current = newOffset;
+    
+    // If it was playing, resume from new offset
+    if (audioState === 'playing') {
+      const ctx = getAudioCtx();
+      const source = ctx.createBufferSource();
+      source.buffer = audioBufferRef.current;
+      source.connect(ctx.destination);
+      source.onended = () => { if (audioStateRef.current === 'playing') stopAudio(); };
+      startTimeRef.current = ctx.currentTime;
+      source.start(0, offsetRef.current);
+      audioSourceRef.current = source;
+    } else {
+      // If paused, just update progress bar
+      const progress = (newOffset / audioBufferRef.current.duration) * 100;
+      setPlaybackProgress(progress);
+    }
+  };
+
   const stopAudio = () => {
     if (audioSourceRef.current) {
       audioSourceRef.current.stop();
@@ -183,7 +217,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     setGeneratingBadge(true);
     try {
       const prompt = `A highly detailed gold medal for civic mastery, featuring a Kenyan shield and the SautiSahihi logo. Photorealistic, clean white background.`;
-      // Pass category context for badge refinement
       const img = await generateTopicImage(prompt, `badge_${selectedTopic.id}`, `A mastery badge for ${selectedTopic.category}`);
       setBadgeImage(img);
       hapticSuccess();
@@ -225,14 +258,15 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
           </div>
         </div>
 
+        {/* ENHANCED AUDIO DASHBOARD */}
         <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-2xl border-2 border-blue-50 dark:border-slate-800 space-y-6">
           <div className="flex justify-between items-center px-2">
              <div className="flex items-center gap-3">
                 <div className={`size-3 rounded-full ${audioState === 'playing' ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'}`} />
                 <span className="text-sm font-black uppercase tracking-widest text-slate-500">
                   {audioState === 'loading' ? 'Preparing Voice...' : 
-                   audioState === 'playing' ? 'Playing Briefing' : 
-                   audioState === 'paused' ? 'Briefing Paused' : 'Audio Briefing Available'}
+                   audioState === 'playing' ? 'Reading to you' : 
+                   audioState === 'paused' ? 'Paused' : 'Listen to this lesson'}
                 </span>
              </div>
              {audioBufferRef.current && (
@@ -242,21 +276,45 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
              )}
           </div>
           
-          <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+          <div className="h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner border-2 border-white/50">
              <div 
-               className="h-full bg-gradient-to-r from-blue-600 to-[#135bec] transition-all duration-300 rounded-full" 
+               className="h-full bg-gradient-to-r from-blue-600 to-[#135bec] transition-all duration-300 rounded-full relative" 
                style={{ width: `${playbackProgress}%` }}
-             />
+             >
+               <div className="absolute right-0 top-0 size-6 bg-white rounded-full border-4 border-[#135bec] shadow-md -translate-y-0" />
+             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-8 pt-4">
-            <button onClick={stopAudio} disabled={audioState === 'idle'} className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30 border-2 border-transparent"><span className="material-symbols-outlined text-4xl">stop</span></button>
-            {audioState === 'playing' ? (
-              <button onClick={pauseAudio} className="size-28 rounded-[2.5rem] bg-amber-500 text-white shadow-[0_20px_40px_-10px_rgba(245,158,11,0.5)] flex items-center justify-center active:scale-95 transition-all"><span className="material-symbols-outlined text-7xl">pause</span></button>
-            ) : (
-              <button onClick={() => playAudio(selectedTopic)} disabled={audioState === 'loading'} className={`size-28 rounded-[2.5rem] text-white shadow-[0_20px_40px_-10px_rgba(19,91,236,0.5)] flex items-center justify-center active:scale-95 transition-all ${audioState === 'loading' ? 'bg-slate-300 animate-pulse' : 'bg-[#135bec]'}`}><span className="material-symbols-outlined text-7xl">{audioState === 'loading' ? 'hourglass_top' : 'play_arrow'}</span></button>
-            )}
-            <button onClick={() => { hapticTap(); stopAudio(); handleBack(); }} className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all border-2 border-transparent"><span className="material-symbols-outlined text-4xl">close</span></button>
+          <div className="flex items-center justify-center gap-4 pt-4">
+            {/* Skip Backward */}
+            <button 
+              onClick={() => skipAudio(-10)} 
+              disabled={audioState === 'idle' || audioState === 'loading'}
+              className="size-16 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[#135bec] flex flex-col items-center justify-center active:scale-90 transition-all disabled:opacity-20 border-2 border-slate-100"
+            >
+              <span className="material-symbols-outlined text-3xl">replay_10</span>
+              <span className="text-[8px] font-black uppercase">Back</span>
+            </button>
+
+            {/* Play / Pause */}
+            <div className="flex items-center gap-6">
+               <button onClick={stopAudio} disabled={audioState === 'idle'} className="size-16 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-all disabled:opacity-30 border-2 border-transparent"><span className="material-symbols-outlined text-4xl">stop</span></button>
+               {audioState === 'playing' ? (
+                 <button onClick={pauseAudio} className="size-28 rounded-[2.5rem] bg-amber-500 text-white shadow-[0_20px_40px_-10px_rgba(245,158,11,0.5)] flex items-center justify-center active:scale-95 transition-all"><span className="material-symbols-outlined text-7xl">pause</span></button>
+               ) : (
+                 <button onClick={() => playAudio(selectedTopic)} disabled={audioState === 'loading'} className={`size-28 rounded-[2.5rem] text-white shadow-[0_20px_40px_-10px_rgba(19,91,236,0.5)] flex items-center justify-center active:scale-95 transition-all ${audioState === 'loading' ? 'bg-slate-300 animate-pulse' : 'bg-[#135bec]'}`}><span className="material-symbols-outlined text-7xl">{audioState === 'loading' ? 'hourglass_top' : 'play_arrow'}</span></button>
+               )}
+            </div>
+
+            {/* Skip Forward */}
+            <button 
+              onClick={() => skipAudio(10)} 
+              disabled={audioState === 'idle' || audioState === 'loading'}
+              className="size-16 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[#135bec] flex flex-col items-center justify-center active:scale-90 transition-all disabled:opacity-20 border-2 border-slate-100"
+            >
+              <span className="material-symbols-outlined text-3xl">forward_10</span>
+              <span className="text-[8px] font-black uppercase">Skip</span>
+            </button>
           </div>
         </div>
 
@@ -305,7 +363,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
         <div className="absolute -right-10 -bottom-10 material-symbols-outlined text-[15rem] opacity-5 rotate-12">school</div>
       </div>
 
-      {/* SEARCH BAR */}
       <div className="px-2">
         <div className="relative group">
           <span className="absolute left-8 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#135bec] text-4xl">search</span>
@@ -327,7 +384,6 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
         </div>
       </div>
 
-      {/* Hugging Face Poster Studio */}
       <div className="bg-emerald-950 p-10 rounded-[4rem] text-white shadow-2xl border-4 border-emerald-500/20">
         <div className="flex items-center gap-4 mb-6">
            <div className="bg-emerald-600 p-3 rounded-2xl"><span className="material-symbols-outlined text-3xl filled">palette</span></div>
