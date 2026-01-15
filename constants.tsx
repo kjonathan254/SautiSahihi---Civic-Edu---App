@@ -43,6 +43,16 @@ export const LEARN_TOPICS: LearnTopic[] = [
     prompt: "A modern KIEMS biometric identification device glowing in a Kenyan community hall." 
   },
   { 
+    id: 'campaign-finance', 
+    title: 'Money in Elections', 
+    summary: 'Understanding limits on how much candidates can spend.', 
+    detailedContent: 'The Election Campaign Financing Act ensures that no single person can "buy" an election. Candidates must report all donations and have a limit on how much they can spend on posters, rallies, and media. This keeps the field fair for everyone, not just the wealthy.',
+    category: 'Finance', 
+    lastUpdated: 'May 2024',
+    image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800",
+    prompt: "A transparent financial ledger next to official Kenyan currency, representing electoral transparency." 
+  },
+  { 
     id: 'six-ballots', 
     title: 'The 6-Ballot System', 
     summary: 'Understanding the different colors of the voting papers.', 
@@ -53,6 +63,16 @@ export const LEARN_TOPICS: LearnTopic[] = [
     prompt: "An artistic layout of six colorful Kenyan ballot papers neatly arranged on a clean table." 
   },
   { 
+    id: 'election-observers', 
+    title: 'The Neutral Referees', 
+    summary: 'Who watches the vote to ensure it is fair?', 
+    detailedContent: 'Election observers are like neutral referees. They come from local churches (like ELOG) and international groups. They do not vote or interfere; they simply watch the process from morning until the last vote is counted to ensure no laws are broken.',
+    category: 'Oversight', 
+    lastUpdated: 'May 2024',
+    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800",
+    prompt: "A group of people wearing 'Election Observer' vests in a Kenyan polling station, holding clipboards." 
+  },
+  { 
     id: 'rights-senior', 
     title: 'Your Rights as a Senior', 
     summary: 'Kenyan law provides special protections for elderly voters at the polls.', 
@@ -61,6 +81,26 @@ export const LEARN_TOPICS: LearnTopic[] = [
     lastUpdated: 'Mar 2024',
     image: "https://images.unsplash.com/photo-1581579438747-104c53d7fbc4?q=80&w=800",
     prompt: "A Kenyan guka being respectfully assisted by an IEBC official at a polling station." 
+  },
+  { 
+    id: 'dispute-resolution', 
+    title: 'Resolving Disagreements', 
+    summary: 'What happens when candidates disagree with results?', 
+    detailedContent: 'In Kenya, we use the law to settle election arguments. If a candidate is unhappy, they must go to the Supreme Court or a tribunal within a set number of days. Judges listen to all evidence and make a final decision that everyone must follow, ensuring peace.',
+    category: 'Legal', 
+    lastUpdated: 'May 2024',
+    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=800",
+    prompt: "A gavel resting on the Constitution of Kenya inside a dignified courtroom." 
+  },
+  { 
+    id: 'civic-peace', 
+    title: 'Peace After the Vote', 
+    summary: 'Staying united as one family after results are announced.', 
+    detailedContent: 'Elections are like a football match; there is a winner and there are those who wait for next time. As elders, your role is to remind the youth that Kenya is bigger than any leader. Our unity as a community is what keeps the country strong long after the voting is over.',
+    category: 'Peace', 
+    lastUpdated: 'May 2024',
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800",
+    prompt: "Two Kenyan elders of different backgrounds sharing a handshake of peace in a sunlit village." 
   },
   { 
     id: 'reg-2026', 
@@ -106,7 +146,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     id: 'checklist', 
     title: 'Polling Day Checklist', 
     summary: 'What to carry and what to expect on the big day.', 
-    detailedContent: 'On election day, wake up early and have a good breakfast. Carry your original ID card or Passport. Remember, as a senior, you can go to the front of the queue.',
+    detailedContent: 'On election day, wake up early and have a good breakfast. Carry your original ID card or Passport. Remember, as a senior, you can go to the front of the line.',
     category: 'Planning', 
     lastUpdated: 'Mar 2024',
     image: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=800",
