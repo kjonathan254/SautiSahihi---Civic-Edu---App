@@ -38,9 +38,13 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
     Respond ONLY in JSON format with these keys: verdict (TRUE/FALSE/CAUTION), summary, explanation, sources (array).
   `;
 
-  const contents: any = { parts: [{ text: prompt }] };
+  const contents: any[] = [{
+    role: 'user',
+    parts: [{ text: prompt }]
+  }];
+
   if (imageBase64) {
-    contents.parts.push({
+    contents[0].parts.push({
       inlineData: {
         data: imageBase64.split(',')[1],
         mimeType: 'image/png'
@@ -98,7 +102,7 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Provide a 2-sentence factual update on Kenyan election news for a senior in ${language}.`,
+      contents: [{ role: 'user', parts: [{ text: `Provide a 2-sentence factual update on Kenyan election news for a senior in ${language}.` }] }],
       config: { tools: [{ googleSearch: {} }] }
     });
     return response.text || "No news found.";
@@ -111,9 +115,6 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
 /**
  * SMART CONTEXT-AWARE IMAGE ORCHESTRATOR
  * Tries: Gemini -> Hugging Face -> Hardcoded Local Fallback
- * 
- * prompt: The base topic name
- * context: The actual text describing the topic (for prompt enrichment)
  */
 export async function generateTopicImage(prompt: string, topicId: string, context?: string, fallbackUrl?: string): Promise<string> {
   const cacheKey = `img_topic_${topicId}`;
@@ -128,8 +129,8 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
     if (context) {
       const aiPromptRefiner = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const refinement = await aiPromptRefiner.models.generateContent({
-        model: 'gemini-3-flash-preview', // Use fast model for prompt expansion
-        contents: `Based on this text: "${context}", write a 1-sentence highly descriptive image generation prompt for a photorealistic scene in Kenya. Focus on dignity and clarity.`
+        model: 'gemini-3-flash-preview',
+        contents: [{ role: 'user', parts: [{ text: `Based on this text: "${context}", write a 1-sentence highly descriptive image generation prompt for a photorealistic scene in Kenya. Focus on dignity and clarity.` }] }]
       });
       if (refinement.text) enrichedPrompt = refinement.text;
     }
@@ -142,7 +143,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `${enrichedPrompt}. Cinematic lighting, 4k resolution, culturally respectful.` }] },
+      contents: [{ role: 'user', parts: [{ text: `${enrichedPrompt}. Cinematic lighting, 4k resolution, culturally respectful.` }] }],
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
@@ -196,7 +197,7 @@ export async function fetchTTSBuffer(text: string, voice: string = 'Kore'): Prom
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
+      contents: [{ role: 'user', parts: [{ text }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
