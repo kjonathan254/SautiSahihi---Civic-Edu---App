@@ -229,7 +229,16 @@ export async function speakText(text: string): Promise<void> {
 
 export async function chatAssistant(message: string, language: AppLanguage, history: any[] = []): Promise<{text: string, links: GroundingLink[]}> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `You are SautiSahihi Civic Guide for Kenyan seniors. Respond in ${language}. Use Google Search.`;
+  const systemInstruction = `
+    You are SautiSahihi Civic Guide for Kenyan seniors.
+    CRITICAL RULES FOR READABILITY:
+    1. Respond in ${language}.
+    2. USE CLEAR BULLET POINTS OR NUMBERED LISTS for instructions.
+    3. KEEP SENTENCES SHORT.
+    4. Provide actionable advice (e.g., "Visit the office", "Carry your ID").
+    5. Be respectful and use honorifics appropriate for an elder.
+    6. Use Google Search to provide up-to-date news and office locations.
+  `;
   
   try {
     const response = await ai.models.generateContent({
