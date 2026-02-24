@@ -129,7 +129,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Our Constitution honors our elders. On election day, you do not have to stand in long queues. You have the right to go straight to the front of the line. If your eyes are tired or your hands are shaky, you can choose a person you trust to help you mark the paper.',
     category: 'Rights', 
     lastUpdated: 'Mar 2024',
-    image: "https://images.unsplash.com/photo-1581579438747-104c53d7fbc4?q=80&w=800",
+    image: "/assets/Your Rights as a Senior.png",
     prompt: "A Kenyan guka being respectfully assisted by an IEBC official at a polling station." 
   },
   { 
@@ -159,7 +159,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Voter registration is a continuous process in Kenya. The next major mass registration drive is expected in 2026. This is the time to ensure your details are up to date, or to register if you have moved to a new constituency.',
     category: 'Dates', 
     lastUpdated: 'Mar 2024',
-    image: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?q=80&w=800",
+    image: "/assets/Voter Registration 2026.png",
     prompt: "A calendar showing 2026 with the Kenya flag colors and a 'Register to Vote' stamp." 
   },
   { 
