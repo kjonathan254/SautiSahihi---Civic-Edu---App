@@ -25,10 +25,10 @@ export const IEBC_HQ_INFO = {
 };
 
 export const ELECTION_MOODS = [
-  { id: 'queue', label: 'The Patient Queue', icon: 'groups', prompt: "A hyper-realistic photograph of ONLY African/Kenyan citizens queuing peacefully at a Kenyan polling station." },
-  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', prompt: "A sharp close-up of a Kenyan elder's hand featuring a bright purple indelible ink stain." },
-  { id: 'papers', label: 'The 6-Ballots', icon: 'style', prompt: "An artistic flat-lay of the 6 official Kenyan ballot papers of different colors." },
-  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', prompt: "A joyful celebration in a vibrant Kenyan village square, waving small Kenyan flags." }
+  { id: 'queue', label: 'The Patient Queue', icon: 'groups', image: '/assets/The Power of Patience.png', prompt: "A hyper-realistic photograph of ONLY African/Kenyan citizens queuing peacefully at a Kenyan polling station." },
+  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', image: '/assets/The Seal of Duty.png', prompt: "A sharp close-up of a Kenyan elder's hand featuring a bright purple indelible ink stain." },
+  { id: 'papers', label: 'The 6-Ballots', icon: 'style', image: '/assets/Your Choice, Your Voice.png', prompt: "An artistic flat-lay of the 6 official Kenyan ballot papers of different colors." },
+  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', image: '/assets/Peaceful Progress.png', prompt: "A joyful celebration in a vibrant Kenyan village square, waving small Kenyan flags." }
 ];
 
 export const LEARN_TOPICS: LearnTopic[] = [
