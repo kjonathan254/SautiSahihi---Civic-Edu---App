@@ -154,7 +154,8 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
   };
 
   const { isListening, isSupported, startListening } = useSpeechToText(lang, (transcript) => {
-    handleSend(transcript);
+    setInput(prev => prev ? prev + ' ' + transcript : transcript);
+    setShowKeyboard(true);
   });
 
   const handleFaqClick = (faq: { q: string, a: string }) => {
@@ -246,7 +247,7 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
       </div>
 
       <div className="space-y-4 pb-4">
-        {!showKeyboard && (
+        {!showKeyboard && isSupported && (
           <div className="flex flex-col items-center gap-4">
             <button 
               onClick={startListening} 
@@ -270,8 +271,30 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
           </div>
         )}
 
+        {!showKeyboard && !isSupported && (
+          <div className="flex flex-col items-center gap-4">
+            <button 
+              onClick={() => { hapticTap(); setShowKeyboard(true); }}
+              className="w-full bg-[#135bec] text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-xl border-b-8 border-blue-900 active:scale-95 transition-all"
+            >
+              {t.assistant || "OPEN CHAT"}
+            </button>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              Speech not supported on this device
+            </p>
+          </div>
+        )}
+
         {showKeyboard && (
           <div className="p-4 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-blue-50 flex items-center gap-2 animate-in slide-in-from-bottom-5">
+            {isSupported && (
+              <button 
+                onClick={startListening}
+                className={`size-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
+              >
+                <span className="material-symbols-outlined text-3xl">{isListening ? 'graphic_eq' : 'mic'}</span>
+              </button>
+            )}
             <input 
               value={input}
               onChange={(e) => setInput(e.target.value)}

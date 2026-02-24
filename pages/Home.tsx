@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppLanguage, TranslationSet } from '../types.ts';
-import { getLiveNewsSummary, speakText, generateTopicImage } from '../geminiService.ts';
+import { getLiveNewsSummary, speakText, generateTopicImage, fastAIResponse } from '../geminiService.ts';
 import { hapticTap, hapticSuccess } from '../utils.ts';
 import { ELECTION_MOODS, IEBC_HQ_INFO, VOTERS_CHARTER } from '../constants.tsx';
 
@@ -46,6 +46,27 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   // Hero Image Generation State
   const [heroImages, setHeroImages] = useState<Record<string, string>>({});
   const [isGeneratingHero, setIsGeneratingHero] = useState(false);
+  
+  // Quick Ask State
+  const [quickInput, setQuickInput] = useState('');
+  const [quickResponse, setQuickResponse] = useState('');
+  const [isQuickLoading, setIsQuickLoading] = useState(false);
+
+  const handleQuickAsk = async () => {
+    if (!quickInput.trim() || isQuickLoading) return;
+    hapticTap();
+    setIsQuickLoading(true);
+    setQuickResponse('');
+    try {
+      const res = await fastAIResponse(quickInput);
+      setQuickResponse(res);
+      hapticSuccess();
+    } catch (e) {
+      setQuickResponse("Sorry, I couldn't get a fast answer right now.");
+    } finally {
+      setIsQuickLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -167,6 +188,35 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
           </div>
         </div>
       </div>
+      
+      {/* Quick Ask Section (Low Latency Flash-Lite) */}
+      <section className="bg-white dark:bg-slate-900 p-8 rounded-[3.5rem] shadow-xl border-4 border-blue-50 dark:border-slate-800 space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="material-symbols-outlined text-[#135bec] text-3xl">bolt</span>
+          <h3 className="text-2xl font-black tracking-tighter uppercase">Quick Civic Ask</h3>
+        </div>
+        <div className="flex gap-2">
+          <input 
+            value={quickInput}
+            onChange={(e) => setQuickInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleQuickAsk()}
+            placeholder="Ask a quick question..."
+            className="flex-1 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 font-bold outline-none focus:border-[#135bec] transition-all"
+          />
+          <button 
+            onClick={handleQuickAsk}
+            disabled={isQuickLoading || !quickInput.trim()}
+            className="bg-[#135bec] text-white p-3 rounded-2xl shadow-lg active:scale-90 transition-all disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined">{isQuickLoading ? 'sync' : 'send'}</span>
+          </button>
+        </div>
+        {quickResponse && (
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-l-4 border-[#135bec] animate-in slide-in-from-top-2">
+            <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{quickResponse}</p>
+          </div>
+        )}
+      </section>
 
       <div className="flex flex-wrap gap-3 px-2 justify-center">
          {ELECTION_MOODS.map(mood => (
@@ -227,6 +277,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
           <div className="size-24 bg-white/20 rounded-[2rem] flex items-center justify-center shrink-0 border-2 border-white/20"><span className="material-symbols-outlined text-6xl filled">fact_check</span></div>
           <div className="space-y-1"><h4 className="font-black text-4xl tracking-tighter">{t.factChecker}</h4><p className="font-bold opacity-90 text-xl italic leading-tight">Identify truth from rumors instantly.</p></div>
         </button>
+        
         <div className="grid grid-cols-2 gap-6">
           <button onClick={() => { hapticTap(); onNavigate('poll'); }} className="p-8 bg-[#135bec] text-white rounded-[4rem] shadow-2xl flex flex-col gap-4 active:scale-95 transition-all text-left"><span className="material-symbols-outlined text-6xl filled">ballot</span><h4 className="font-black text-3xl tracking-tighter">{t.poll}</h4><p className="text-sm font-bold opacity-70">Practice Voting</p></button>
           <button onClick={() => { hapticTap(); onNavigate('learn'); }} className="p-8 bg-emerald-600 text-white rounded-[4rem] shadow-2xl flex flex-col gap-4 active:scale-95 transition-all text-left"><span className="material-symbols-outlined text-6xl filled">school</span><h4 className="font-black text-3xl tracking-tighter">{t.learn}</h4><p className="text-sm font-bold opacity-70">Civic Academy</p></button>

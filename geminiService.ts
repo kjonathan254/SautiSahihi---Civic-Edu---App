@@ -28,7 +28,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   try {
     const aiRefiner = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
     const refinement = await aiRefiner.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-lite-latest',
       contents: [{ role: 'user', parts: [{ text: `Create a 1-sentence cinematic photo prompt for: "${prompt}". Focus on: Kenyan citizens, realistic lighting, Nairobi atmosphere, high dignity. Context: ${context || 'Kenyan civic life'}. Style: Photorealistic 8k.` }] }]
     });
     if (refinement.text) refinedPrompt = refinement.text;
@@ -40,7 +40,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3-pro-image-preview',
       contents: [{ role: 'user', parts: [{ text: refinedPrompt }] }],
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
@@ -58,6 +58,19 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   return fallbackUrl || `https://picsum.photos/seed/${topicId}/800/450`;
 }
 
+export async function fastAIResponse(prompt: string): Promise<string> {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite-latest',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+    });
+    return response.text || "No response.";
+  } catch (e) {
+    return "Error getting fast response.";
+  }
+}
+
 export async function factCheckClaim(claim: string, imageBase64?: string, language: AppLanguage = 'ENG'): Promise<FactCheckResult & { groundingLinks?: GroundingLink[] }> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   const prompt = `Fact-check this claim for a Kenyan audience: "${claim}". Respond in ${language}. Use JSON format.`;
@@ -67,7 +80,7 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
   }
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview', 
+      model: 'gemini-3.1-pro-preview', 
       contents,
       config: { tools: [{ googleSearch: {} }], responseMimeType: "application/json" }
     });
@@ -84,7 +97,7 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3.1-pro-preview',
       contents: [{ role: 'user', parts: [{ text: `Provide a 2-sentence factual update on Kenyan news in ${language}.` }] }],
       config: { tools: [{ googleSearch: {} }] }
     });
@@ -138,7 +151,7 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3.1-pro-preview',
       contents: [...history, { role: 'user', parts: [{ text: message }] }],
       config: { tools: [{ googleSearch: {} }] }
     });

@@ -98,3 +98,12 @@ export interface Briefing {
   title: string;
   summary: string;
 }
+
+declare global {
+  interface Window {
+    aistudio?: {
+      hasSelectedApiKey?: () => Promise<boolean>;
+      openSelectKey?: () => Promise<void>;
+    };
+  }
+}

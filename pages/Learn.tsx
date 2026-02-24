@@ -51,12 +51,12 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   };
 
   useEffect(() => {
-    filteredTopics.forEach(topic => {
-      if (!topicImages[topic.id]) {
+    LEARN_TOPICS.forEach(topic => {
+      if (!topicImages[topic.id] && !loadingImages[topic.id]) {
         loadTopicImage(topic);
       }
     });
-  }, [filteredTopics]);
+  }, []);
 
   const playAudio = async (topic: LearnTopic) => {
     hapticTap();
