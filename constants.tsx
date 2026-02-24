@@ -43,34 +43,84 @@ export const LEARN_TOPICS: LearnTopic[] = [
     prompt: "A modern KIEMS biometric identification device glowing in a Kenyan community hall." 
   },
   { 
-    id: 'campaign-finance', 
-    title: 'Money in Elections', 
-    summary: 'Understanding limits on how much candidates can spend.', 
-    detailedContent: 'The Election Campaign Financing Act ensures that no single person can "buy" an election. Candidates must report all donations and have a limit on how much they can spend on posters, rallies, and media. This keeps the field fair for everyone, not just the wealthy.',
+    id: 'campaign-finance-regs', 
+    title: 'Campaign Finance Regulations', 
+    summary: 'Why candidates must explain where their wealth comes from.', 
+    detailedContent: 'To make sure elections are fair for everyone, not just the rich, Kenya has laws on Campaign Finance. Candidates must report all the money they get and spend. They also have a limit on how much they can spend on posters and rallies. This ensures that no one can "buy" your vote with money, and that our leaders remain accountable to the people, not big donors.',
     category: 'Finance', 
-    lastUpdated: 'May 2024',
+    lastUpdated: 'June 2024',
     image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800",
-    prompt: "A transparent financial ledger next to official Kenyan currency, representing electoral transparency." 
+    prompt: "A transparent financial ledger next to official Kenyan currency and a set of keys, representing accountability and transparency." 
   },
   { 
-    id: 'six-ballots', 
-    title: 'The 6-Ballot System', 
-    summary: 'Understanding the different colors of the voting papers.', 
-    detailedContent: 'In a General Election, you will receive six different ballot papers. Each has a unique color: white for President, blue for Senate, yellow for Governor, green for Member of National Assembly, purple for Woman Representative, and beige for MCA.',
-    category: 'Election Day', 
-    lastUpdated: 'Mar 2024',
-    image: "https://images.unsplash.com/photo-1540910419892-f0c976c64663?q=80&w=800",
-    prompt: "An artistic layout of six colorful Kenyan ballot papers neatly arranged on a clean table." 
-  },
-  { 
-    id: 'election-observers', 
-    title: 'The Neutral Referees', 
-    summary: 'Who watches the vote to ensure it is fair?', 
-    detailedContent: 'Election observers are like neutral referees. They come from local churches (like ELOG) and international groups. They do not vote or interfere; they simply watch the process from morning until the last vote is counted to ensure no laws are broken.',
+    id: 'silent-observers', 
+    title: 'The Silent Observers', 
+    summary: 'Neutral watchers who ensure nobody cheats at the station.', 
+    detailedContent: 'Election Observers are different from party agents. While agents work for a specific candidate, Observers work for the public. They come from churches, international groups, and NGOs. They don\'t talk to voters; they simply watch the process and report any mistakes to ensure the vote is 100% fair.',
     category: 'Oversight', 
-    lastUpdated: 'May 2024',
+    lastUpdated: 'June 2024',
     image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800",
-    prompt: "A group of people wearing 'Election Observer' vests in a Kenyan polling station, holding clipboards." 
+    prompt: "A dignified woman wearing a blue 'Election Observer' vest, holding a clipboard and watching a Kenyan polling station with a peaceful, sharp focus." 
+  },
+  { 
+    id: 'legal-peace', 
+    title: 'The Legal Path to Peace', 
+    summary: 'How we solve arguments in the courtroom instead of the streets.', 
+    detailedContent: 'If a candidate disagrees with the results, they have exactly 7 days to file a petition in the Supreme Court. This "Dispute Resolution" system is why we stay peaceful. We wait for the Judges to hear all the evidence and make a final decision. This law protects our country from chaos by keeping arguments in the courtroom.',
+    category: 'Legal', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=800",
+    prompt: "A wooden gavel resting on the Constitution of Kenya inside a quiet, sunlit courtroom in Nairobi." 
+  },
+  { 
+    id: 'ballot-secrecy', 
+    title: 'Secret of the Ballot', 
+    summary: 'Nobody has the right to know who you voted for.', 
+    detailedContent: 'The law says your vote is a secret. It is actually a crime for someone to force you to show them who you marked. You should never take a photo of your marked ballot paper. This secrecy protects you from being threatened or forced to vote for someone you don\'t like. Inside the booth, you are the only boss.',
+    category: 'Rights', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1540910419892-f0c976c64663?q=80&w=800",
+    prompt: "A senior Kenyan man marking his ballot in a private wooden booth, with a look of quiet empowerment and dignity." 
+  },
+  { 
+    id: 'nomination-lists', 
+    title: 'Seats for Everyone', 
+    summary: 'How youth, women, and people with disabilities get a seat at the table.', 
+    detailedContent: 'The Constitution of Kenya ensures that our Parliament and County Assemblies reflect everyone. This is done through "Nomination Lists". After you vote, political parties are given extra seats based on their performance. These seats are specifically for women, youth, and people with disabilities, ensuring no one is forgotten in the law-making process.',
+    category: 'Representation', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1577416416210-9993309a1240?q=80&w=800",
+    prompt: "A diverse group of Kenyan leaders—a young man, a woman, and an elderly man with a cane—sitting together in a formal assembly, looking determined and unified." 
+  },
+  { 
+    id: 'gender-rule', 
+    title: 'Balanced Leadership', 
+    summary: 'Why our leadership must include both men and women.', 
+    detailedContent: 'Just as a family is strongest when both parents are heard, our country is strongest when both men and women lead. The 2/3 Gender Rule is a constitutional promise that no more than two-thirds of any elected or appointed body should be of the same gender. It ensures that the perspectives of our mothers, daughters, and sisters are always part of the national conversation.',
+    category: 'Equality', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1521791136064-7986c2959d43?q=80&w=800",
+    prompt: "A balanced scale in a sunlit Kenyan courtroom, with small symbols representing men and women on each side, representing harmony and justice." 
+  },
+  { 
+    id: 'recall-power', 
+    title: 'Holding Leaders Accountable', 
+    summary: 'The power to remove a leader before their time is up.', 
+    detailedContent: 'If a Member of Parliament or an MCA fails to do their job or breaks the law, you don\'t have to wait five years to change them. The "Recall Clause" allows voters to petition the IEBC to remove a leader early. While it is a serious process with high requirements, it serves as a reminder that the true power belongs to you, the voter, every single day.',
+    category: 'Accountability', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=800",
+    prompt: "A group of Kenyan seniors reviewing a formal document together in a clean village office, with the Constitution of Kenya open on the table." 
+  },
+  { 
+    id: 'devolution-dispensary', 
+    title: 'Your Vote & Your Hospital', 
+    summary: 'Why your choice for Governor and MCA affects your health.', 
+    detailedContent: 'Since 2013, Kenya has used "Devolution" to bring money closer to you. When you vote for your Governor and MCA, you are choosing who will manage your local hospitals, village roads, and clean water. These leaders decide if your local dispensary has medicine or if your market has lights. Your vote at the county level is what puts food and health on the table in your own neighborhood.',
+    category: 'Devolution', 
+    lastUpdated: 'June 2024',
+    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800",
+    prompt: "A modern, clean Kenyan dispensary with a 'County Government' sign, where a senior is receiving a warm smile and a box of medicine from a nurse." 
   },
   { 
     id: 'rights-senior', 
@@ -81,16 +131,6 @@ export const LEARN_TOPICS: LearnTopic[] = [
     lastUpdated: 'Mar 2024',
     image: "https://images.unsplash.com/photo-1581579438747-104c53d7fbc4?q=80&w=800",
     prompt: "A Kenyan guka being respectfully assisted by an IEBC official at a polling station." 
-  },
-  { 
-    id: 'dispute-resolution', 
-    title: 'Resolving Disagreements', 
-    summary: 'What happens when candidates disagree with results?', 
-    detailedContent: 'In Kenya, we use the law to settle election arguments. If a candidate is unhappy, they must go to the Supreme Court or a tribunal within a set number of days. Judges listen to all evidence and make a final decision that everyone must follow, ensuring peace.',
-    category: 'Legal', 
-    lastUpdated: 'May 2024',
-    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=800",
-    prompt: "A gavel resting on the Constitution of Kenya inside a dignified courtroom." 
   },
   { 
     id: 'civic-peace', 

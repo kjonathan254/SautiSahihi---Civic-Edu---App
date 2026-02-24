@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { AppLanguage, TranslationSet, FactCheckResult, Verdict, GroundingLink } from '../types.ts';
 import { factCheckClaim, speakText } from '../geminiService.ts';
-import { analyzeNewsTone, HFToneResult } from '../hfService.ts';
 import { fileToBase64, hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
 import { useSpeechToText } from '../useSpeechToText.ts';
 
@@ -12,7 +11,6 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<(FactCheckResult & { groundingLinks?: GroundingLink[] }) | null>(null);
-  const [toneResults, setToneResults] = useState<HFToneResult[]>([]);
   const [isReading, setIsReading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,18 +31,11 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
     hapticTap();
     setLoading(true);
     setResult(null);
-    setToneResults([]);
     setError(null);
     try {
-      // 1. Primary Fact Check via Gemini
+      // Primary Fact Check via Gemini
       const res = await factCheckClaim(claim, image || undefined, lang);
       setResult(res);
-
-      // 2. Parallel Tone Analysis via Hugging Face (Only if text is present)
-      if (claim.length > 10) {
-        const tones = await analyzeNewsTone(claim);
-        setToneResults(tones);
-      }
 
       if (res.verdict === Verdict.TRUE) hapticSuccess();
       else hapticWarning();
@@ -77,9 +68,6 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
       : `Important verification for the family: SautiSahihi has marked this as ${result.verdict}. Analysis: ${result.summary}. Let's stay informed!`;
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
   };
-
-  // Helper to get highest tone
-  const topTone = toneResults.length > 0 ? toneResults[0] : null;
 
   return (
     <div className="space-y-6 pb-20">
@@ -136,17 +124,6 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
 
       {result && (
         <div className="animate-in zoom-in duration-500 space-y-4">
-          {/* Tone Analysis Badge (Hugging Face Powered) */}
-          {topTone && topTone.label === "Fear-mongering" && topTone.score > 0.6 && (
-            <div className="bg-rose-600 text-white p-4 rounded-2xl flex items-center gap-3 shadow-lg border-b-4 border-rose-900 animate-bounce">
-              <span className="material-symbols-outlined text-3xl">warning</span>
-              <div className="flex-1">
-                <p className="font-black uppercase text-xs tracking-widest">Hugging Face Insight</p>
-                <p className="font-bold">This message uses inflammatory or scary language.</p>
-              </div>
-            </div>
-          )}
-
           <div className={`p-8 rounded-[3.5rem] border-4 shadow-2xl ${
             result.verdict === Verdict.TRUE ? 'border-emerald-500 bg-emerald-50' :
             result.verdict === Verdict.FALSE ? 'border-red-500 bg-red-50' : 'border-amber-500 bg-amber-50'
@@ -154,7 +131,7 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
             <div className="flex justify-end mb-4">
                <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-black/10">
                   <span className="material-symbols-outlined text-xs text-blue-600 filled">verified</span>
-                  <span className="text-[8px] font-black uppercase text-gray-500 tracking-widest">Hybrid AI Grounding</span>
+                  <span className="text-[8px] font-black uppercase text-gray-500 tracking-widest">Verified Grounding</span>
                </div>
             </div>
 

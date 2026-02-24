@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppLanguage, TranslationSet, GroundingLink } from '../types.ts';
 import { chatAssistant, speakText } from '../geminiService.ts';
-import { translateToKiswahili } from '../hfService.ts';
 import { hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
 import { CIVIC_FAQS } from '../constants.tsx';
 import { useSpeechToText } from '../useSpeechToText.ts';
@@ -14,19 +13,13 @@ interface Props {
 interface Message {
   role: 'user' | 'ai';
   text: string;
-  originalText?: string;
   links?: GroundingLink[];
-  isTranslated?: boolean;
 }
 
 /**
  * SeniorFriendlyText - Parses markdown-like strings into clean, senior-friendly layouts.
- * - Replaces **text** with bold + underline.
- * - Converts lists into actual styled blocks.
- * - Adds spacing between sentences.
  */
 const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
-  // 1. Process double asterisks (Emphasis)
   const processEmphasis = (line: string) => {
     const parts = line.split(/\*\*(.*?)\*\*/g);
     return parts.map((part, i) => {
@@ -41,7 +34,6 @@ const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
     });
   };
 
-  // 2. Split by lines and process lists
   const lines = text.split('\n');
   const blocks: React.ReactNode[] = [];
   let currentList: React.ReactNode[] = [];
@@ -64,7 +56,6 @@ const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
       return;
     }
 
-    // Detect list items (starts with *, -, or number.)
     const listMatch = trimmed.match(/^(\*|-|\d+\.)\s+(.*)/);
     if (listMatch) {
       currentList.push(
@@ -155,39 +146,10 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
     if (isReading) return;
     setIsReading(true);
     try {
-      // Clean text for speech synthesis (remove asterisks)
       const cleanText = text.replace(/\*\*/g, '');
       await speakText(cleanText);
     } finally {
       setIsReading(false);
-    }
-  };
-
-  const toggleTranslation = async () => {
-    if (currentMsg.role !== 'ai' || loading) return;
-    hapticTap();
-
-    if (currentMsg.isTranslated && currentMsg.originalText) {
-      const reverted = { ...currentMsg, text: currentMsg.originalText, isTranslated: false };
-      setMessages(prev => [...prev.slice(0, -1), reverted]);
-    } else {
-      setLoading(true);
-      try {
-        const swahiliText = await translateToKiswahili(currentMsg.text);
-        const translated = { 
-          ...currentMsg, 
-          originalText: currentMsg.text, 
-          text: swahiliText, 
-          isTranslated: true 
-        };
-        setMessages(prev => [...prev.slice(0, -1), translated]);
-        hapticSuccess();
-        handleRead(swahiliText);
-      } catch (e) {
-        hapticWarning();
-      } finally {
-        setLoading(false);
-      }
     }
   };
 
@@ -277,16 +239,6 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
                   className={`size-20 rounded-3xl flex items-center justify-center transition-all ${isReading ? 'bg-emerald-500 text-white animate-pulse shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)]' : 'bg-slate-100 dark:bg-slate-900 text-[#135bec] border-2 border-transparent'}`}
                >
                  <span className="material-symbols-outlined text-4xl">{isReading ? 'graphic_eq' : 'volume_up'}</span>
-               </button>
-
-               <button 
-                  onClick={toggleTranslation}
-                  className={`px-8 py-5 rounded-[2rem] font-black text-xl uppercase tracking-widest shadow-lg flex items-center gap-3 active:scale-95 transition-all ${
-                    currentMsg.isTranslated ? 'bg-emerald-100 text-emerald-700' : 'bg-[#135bec] text-white'
-                  }`}
-               >
-                 <span className="material-symbols-outlined">translate</span>
-                 {currentMsg.isTranslated ? 'Show Original' : 'Translate'}
                </button>
             </div>
           </div>
