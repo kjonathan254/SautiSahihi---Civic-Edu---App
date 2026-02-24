@@ -17,9 +17,14 @@ export const getAudioCtx = () => {
  * Sequence: Cache -> Gemini -> Static Fallback
  */
 export async function generateTopicImage(prompt: string, topicId: string, context?: string, fallbackUrl?: string): Promise<string> {
+  // 1. Check if we have a local asset fallback and prioritize it
+  if (fallbackUrl && fallbackUrl.startsWith('/assets/')) {
+    return fallbackUrl;
+  }
+
   const cacheKey = `img_v5_${topicId}`;
   
-  // 1. Check Cache
+  // 2. Check Cache
   const cached = await getFromCache(cacheKey);
   if (cached) return cached;
 
