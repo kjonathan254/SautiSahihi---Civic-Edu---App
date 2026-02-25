@@ -46,13 +46,15 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [hasKey, setHasKey] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
 
   useEffect(() => {
     localStorage.setItem('lang', lang);
     localStorage.setItem('darkMode', darkMode.toString());
+    localStorage.setItem('isAdmin', isAdmin.toString());
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
-  }, [lang, darkMode]);
+  }, [lang, darkMode, isAdmin]);
 
   useEffect(() => {
     if (!hasKey) {
@@ -113,7 +115,7 @@ const App: React.FC = () => {
       case 'assistant': return <Assistant lang={lang} t={t} />;
       case 'office-locator': return <OfficeLocator lang={lang} t={t} />;
       case 'analytics': return <Analytics lang={lang} t={t} />;
-      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} t={t} onOpenKey={handleOpenKey} onNavigate={navigateTo} />;
+      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} t={t} onOpenKey={handleOpenKey} onNavigate={navigateTo} isAdmin={isAdmin} setIsAdmin={setIsAdmin} />;
       default: return <Home lang={lang} t={t} onNavigate={navigateTo} />;
     }
   };

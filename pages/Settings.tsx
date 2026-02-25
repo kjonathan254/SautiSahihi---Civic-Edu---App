@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLanguage, TranslationSet } from '../types.ts';
-import { hapticTap } from '../utils.ts';
+import { hapticTap, hapticSuccess } from '../utils.ts';
 
 interface Props {
   lang: AppLanguage;
@@ -11,9 +11,26 @@ interface Props {
   t: TranslationSet;
   onOpenKey?: () => void;
   onNavigate?: (tab: string) => void;
+  isAdmin: boolean;
+  setIsAdmin: (a: boolean) => void;
 }
 
-const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, onOpenKey, onNavigate }) => {
+const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, onOpenKey, onNavigate, isAdmin, setIsAdmin }) => {
+  const [tapCount, setTapCount] = useState(0);
+
+  const handleVersionTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    if (newCount >= 7) {
+      hapticSuccess();
+      setIsAdmin(!isAdmin);
+      setTapCount(0);
+      alert(isAdmin ? "Admin Mode Disabled" : "Admin Mode Enabled! You can now see the Analytics button.");
+    } else {
+      hapticTap();
+    }
+  };
+
   const languages: { code: AppLanguage; label: string }[] = [
     { code: 'ENG', label: 'English' },
     { code: 'KIS', label: 'Kiswahili' },
@@ -82,7 +99,10 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
         </button>
       </section>
 
-      <div className="p-8 bg-rose-50 dark:bg-rose-900/10 rounded-[2.5rem] border-4 border-rose-100 flex items-start gap-4">
+      <div 
+        onClick={handleVersionTap}
+        className="p-8 bg-rose-50 dark:bg-rose-900/10 rounded-[2.5rem] border-4 border-rose-100 flex items-start gap-4 select-none active:bg-rose-100 transition-colors"
+      >
         <span className="material-symbols-outlined text-rose-500 text-3xl">info</span>
         <div>
           <h3 className="text-2xl font-black text-rose-600 tracking-tight uppercase">Master Registry Enabled</h3>
@@ -92,13 +112,15 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
         </div>
       </div>
 
-      <button 
-        onClick={() => onNavigate?.('analytics')}
-        className="w-full py-6 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
-      >
-        <span className="material-symbols-outlined">monitoring</span>
-        View Backend Analytics
-      </button>
+      {isAdmin && (
+        <button 
+          onClick={() => onNavigate?.('analytics')}
+          className="w-full py-6 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all border-2 border-dashed border-slate-200"
+        >
+          <span className="material-symbols-outlined">monitoring</span>
+          View Backend Analytics
+        </button>
+      )}
     </div>
   );
 };
