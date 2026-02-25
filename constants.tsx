@@ -25,10 +25,10 @@ export const IEBC_HQ_INFO = {
 };
 
 export const ELECTION_MOODS = [
-  { id: 'queue', label: 'The Patient Queue', icon: 'groups', image: '/assets/The Power of Patience.png', prompt: "A hyper-realistic photograph of ONLY African/Kenyan citizens queuing peacefully at a Kenyan polling station." },
-  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', image: '/assets/The Seal of Duty.png', prompt: "A sharp close-up of a Kenyan elder's hand featuring a bright purple indelible ink stain." },
-  { id: 'papers', label: 'The 6-Ballots', icon: 'style', image: '/assets/Your Choice, Your Voice.png', prompt: "An artistic flat-lay of the 6 official Kenyan ballot papers of different colors." },
-  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', image: '/assets/Peaceful Progress.png', prompt: "A joyful celebration in a vibrant Kenyan village square, waving small Kenyan flags." }
+  { id: 'queue', label: 'The Patient Queue', icon: 'groups', image: '/assets/ThePowerOfPatience.png', prompt: "A hyper-realistic photograph of ONLY African/Kenyan citizens queuing peacefully at a Kenyan polling station." },
+  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', image: '/assets/TheSealOfDuty.png', prompt: "A sharp close-up of a Kenyan elder's hand featuring a bright purple indelible ink stain." },
+  { id: 'papers', label: 'The 6-Ballots', icon: 'style', image: '/assets/YourChoiceYourVoice.png', prompt: "An artistic flat-lay of the 6 official Kenyan ballot papers of different colors." },
+  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', image: '/assets/PeacefulProgress.png', prompt: "A joyful celebration in a vibrant Kenyan village square, waving small Kenyan flags." }
 ];
 
 export const LEARN_TOPICS: LearnTopic[] = [
@@ -39,7 +39,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Every kit is pre-loaded with an encrypted register for its specific polling station. When you place your finger on the sensor, the machine compares it against its internal memory—it does not need an internet connection to know who you are.',
     category: 'Technology', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/How the KIEMS Kit Works.png",
+    image: "/assets/HowTheKIEMSKitWorks.png",
     prompt: "A modern KIEMS biometric identification device glowing in a Kenyan community hall." 
   },
   { 
@@ -49,7 +49,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'To make sure elections are fair for everyone, not just the rich, Kenya has laws on Campaign Finance. Candidates must report all the money they get and spend. They also have a limit on how much they can spend on posters and rallies. This ensures that no one can "buy" your vote with money, and that our leaders remain accountable to the people, not big donors.',
     category: 'Finance', 
     lastUpdated: 'June 2024',
-    image: "/assets/Campaign Finance Regulations.png",
+    image: "/assets/CampaignFinanceRegulations.png",
     prompt: "A transparent financial ledger next to official Kenyan currency and a set of keys, representing accountability and transparency." 
   },
   { 
@@ -59,7 +59,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Election Observers are different from party agents. While agents work for a specific candidate, Observers work for the public. They come from churches, international groups, and NGOs. They don\'t talk to voters; they simply watch the process and report any mistakes to ensure the vote is 100% fair.',
     category: 'Oversight', 
     lastUpdated: 'June 2024',
-    image: "/assets/Election Observers.png",
+    image: "/assets/ElectionObservers.png",
     prompt: "A dignified woman wearing a blue 'Election Observer' vest, holding a clipboard and watching a Kenyan polling station with a peaceful, sharp focus." 
   },
   { 
@@ -69,7 +69,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'If a candidate disagrees with the results, they have exactly 7 days to file a petition in the Supreme Court. This "Dispute Resolution" system is why we stay peaceful. We wait for the Judges to hear all the evidence and make a final decision. This law protects our country from chaos by keeping arguments in the courtroom.',
     category: 'Legal', 
     lastUpdated: 'June 2024',
-    image: "/assets/Election Dispute Resolution - The Legal Path to Peace.png",
+    image: "/assets/ElectionDisputeResolution.png",
     prompt: "A wooden gavel resting on the Constitution of Kenya inside a quiet, sunlit courtroom in Nairobi." 
   },
   { 
@@ -79,7 +79,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'The law says your vote is a secret. It is actually a crime for someone to force you to show them who you marked. You should never take a photo of your marked ballot paper. This secrecy protects you from being threatened or forced to vote for someone you don\'t like. Inside the booth, you are the only boss.',
     category: 'Rights', 
     lastUpdated: 'June 2024',
-    image: "/assets/Secret of the Ballot - Your vote your secret.png",
+    image: "/assets/SecretOfTheBallot.png",
     prompt: "A senior Kenyan man marking his ballot in a private wooden booth, with a look of quiet empowerment and dignity." 
   },
   { 
@@ -89,7 +89,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'The Constitution of Kenya ensures that our Parliament and County Assemblies reflect everyone. This is done through "Nomination Lists". After you vote, political parties are given extra seats based on their performance. These seats are specifically for women, youth, and people with disabilities, ensuring no one is forgotten in the law-making process.',
     category: 'Representation', 
     lastUpdated: 'June 2024',
-    image: "/assets/Seats for Everyone.png",
+    image: "/assets/SeatsForEveryone.png",
     prompt: "A diverse group of Kenyan leaders—a young man, a woman, and an elderly man with a cane—sitting together in a formal assembly, looking determined and unified." 
   },
   { 
@@ -99,7 +99,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Just as a family is strongest when both parents are heard, our country is strongest when both men and women lead. The 2/3 Gender Rule is a constitutional promise that no more than two-thirds of any elected or appointed body should be of the same gender. It ensures that the perspectives of our mothers, daughters, and sisters are always part of the national conversation.',
     category: 'Equality', 
     lastUpdated: 'June 2024',
-    image: "/assets/Balanced Leadership.png",
+    image: "/assets/BalancedLeadership.png",
     prompt: "A balanced scale in a sunlit Kenyan courtroom, with small symbols representing men and women on each side, representing harmony and justice." 
   },
   { 
@@ -109,7 +109,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'If a Member of Parliament or an MCA fails to do their job or breaks the law, you don\'t have to wait five years to change them. The "Recall Clause" allows voters to petition the IEBC to remove a leader early. While it is a serious process with high requirements, it serves as a reminder that the true power belongs to you, the voter, every single day.',
     category: 'Accountability', 
     lastUpdated: 'June 2024',
-    image: "/assets/Holding Leaders Accountable.png",
+    image: "/assets/HoldingLeadersAccountable.png",
     prompt: "A group of Kenyan seniors reviewing a formal document together in a clean village office, with the Constitution of Kenya open on the table." 
   },
   { 
@@ -119,7 +119,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Since 2013, Kenya has used "Devolution" to bring money closer to you. When you vote for your Governor and MCA, you are choosing who will manage your local hospitals, village roads, and clean water. These leaders decide if your local dispensary has medicine or if your market has lights. Your vote at the county level is what puts food and health on the table in your own neighborhood.',
     category: 'Devolution', 
     lastUpdated: 'June 2024',
-    image: "/assets/Your Vote & Your Hospital.png",
+    image: "/assets/YourVoteHospital.png",
     prompt: "A modern, clean Kenyan dispensary with a 'County Government' sign, where a senior is receiving a warm smile and a box of medicine from a nurse." 
   },
   { 
@@ -129,7 +129,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Our Constitution honors our elders. On election day, you do not have to stand in long queues. You have the right to go straight to the front of the line. If your eyes are tired or your hands are shaky, you can choose a person you trust to help you mark the paper.',
     category: 'Rights', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/Your Rights as a Senior.png",
+    image: "/assets/YourRightsAsASenior.png",
     prompt: "A Kenyan guka being respectfully assisted by an IEBC official at a polling station." 
   },
   { 
@@ -139,7 +139,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Elections are like a football match; there is a winner and there are those who wait for next time. As elders, your role is to remind the youth that Kenya is bigger than any leader. Our unity as a community is what keeps the country strong long after the voting is over.',
     category: 'Peace', 
     lastUpdated: 'May 2024',
-    image: "/assets/Peace After the Vote.png",
+    image: "/assets/PeaceAfterTheVote.png",
     prompt: "Two Kenyan elders of different backgrounds sharing a handshake of peace in a sunlit village." 
   },
   { 
@@ -149,7 +149,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Preparation for the next General Election involves several critical dates. Continuous voter registration will peak in 2026 and early 2027. Political parties will hold their primaries to pick candidates between February and May 2027. The big day, the General Election, is legally set for the second Tuesday of August 2027. Knowing these dates helps you plan your travel and ensure your voice is heard.',
     category: 'Dates', 
     lastUpdated: 'May 2024',
-    image: "/assets/Key Elections Date - Road map to 2027.png",
+    image: "/assets/KeyElectionDates2027.png",
     prompt: "A dignified Kenyan desktop calendar for 2027, with August 10th circled in bright red. Next to it is a Kenyan ID card and a pair of reading glasses on a polished wooden table." 
   },
   { 
@@ -159,7 +159,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Voter registration is a continuous process in Kenya. The next major mass registration drive is expected in 2026. This is the time to ensure your details are up to date, or to register if you have moved to a new constituency.',
     category: 'Dates', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/Voter Registration 2026.png",
+    image: "/assets/VoterRegistration2026.png",
     prompt: "A calendar showing 2026 with the Kenya flag colors and a 'Register to Vote' stamp." 
   },
   { 
@@ -169,7 +169,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'To register, visit any IEBC office in your constituency. Present your original National Identity Card or valid Passport. The officer will record your biometrics, including fingerprints and a photo.',
     category: 'Process', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/How to Register as a Kenyan Voter.png",
+    image: "/assets/HowToRegister.png",
     prompt: "A smiling Kenyan elder holding their original ID card at a desk with an IEBC official." 
   },
   { 
@@ -179,7 +179,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'It is vital to check your registration status before any election. You can do this by sending your ID number via SMS to the official IEBC code, or by visiting the IEBC website.',
     category: 'Verification', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/Verify Your Status - How to verify to Status.png",
+    image: "/assets/VerifyYourStatus.png",
     prompt: "A senior woman looking at her mobile phone with a look of relief and satisfaction." 
   },
   { 
@@ -189,7 +189,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'Election offenses carry heavy penalties. It is illegal to take a photo of your marked ballot paper. Bribery, or accepting money to vote, is a serious crime.',
     category: 'Safety', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/Election Offenses and Penalties.png",
+    image: "/assets/ElectionOffenses.png",
     prompt: "A 'No Photography' and 'No Bribery' sign outside a Kenyan polling station." 
   },
   { 
@@ -199,7 +199,7 @@ export const LEARN_TOPICS: LearnTopic[] = [
     detailedContent: 'On election day, wake up early and have a good breakfast. Carry your original ID card or Passport. Remember, as a senior, you can go to the front of the line.',
     category: 'Planning', 
     lastUpdated: 'Mar 2024',
-    image: "/assets/Polling Day Checklist - August 10, 2027.png",
+    image: "/assets/PollingDayChecklist.png",
     prompt: "A small kit containing a Kenyan ID, a water bottle, and a hat, ready for election day." 
   }
 ];
