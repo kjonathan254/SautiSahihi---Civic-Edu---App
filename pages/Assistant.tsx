@@ -134,6 +134,13 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
       setMessages(prev => [...prev, aiMsg]);
       hapticSuccess();
       handleRead(response.text);
+
+      // Track assistant query
+      try {
+        await fetch('/api/track/assistant', { method: 'POST' });
+      } catch (trackErr) {
+        console.warn("Assistant tracking failed", trackErr);
+      }
     } catch (e) {
       hapticWarning();
       setMessages(prev => [...prev, { role: 'ai', text: "Pole, I am having trouble connecting. Please try again in a moment." }]);
@@ -158,17 +165,37 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
     setShowKeyboard(true);
   });
 
-  const handleFaqClick = (faq: { q: string, a: string }) => {
+  const [faqs, setFaqs] = useState<{ id: number, question: string, answer: string, visits: number }[]>([]);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await fetch('/api/faqs');
+        const data = await res.json();
+        setFaqs(data);
+      } catch (e) {
+        console.warn("Failed to fetch FAQs", e);
+      }
+    };
+    fetchFaqs();
+  }, []);
+
+  const handleFaqClick = async (faq: { id: number, question: string, answer: string }) => {
     hapticTap();
     setMessages(prev => [
       ...prev, 
-      { role: 'user', text: faq.q },
-      { role: 'ai', text: faq.a }
+      { role: 'user', text: faq.question },
+      { role: 'ai', text: faq.answer }
     ]);
-    handleRead(faq.a);
-  };
+    handleRead(faq.answer);
 
-  const faqs = CIVIC_FAQS[lang] || CIVIC_FAQS['ENG'];
+    // Track visit
+    try {
+      await fetch(`/api/faqs/${faq.id}/visit`, { method: 'POST' });
+    } catch (e) {
+      console.warn("FAQ analytics failed", e);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-500 max-w-2xl mx-auto px-2">
@@ -326,7 +353,7 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
                 onClick={() => handleFaqClick(faq)} 
                 className="w-full p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 rounded-[2rem] text-left shadow-sm flex items-center justify-between group active:bg-blue-50"
               >
-                <span className="text-xl font-black text-slate-700 dark:text-white">{faq.q}</span>
+                <span className="text-xl font-black text-slate-700 dark:text-white">{faq.question}</span>
                 <span className="material-symbols-outlined text-[#135bec] group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
               </button>
             ))}

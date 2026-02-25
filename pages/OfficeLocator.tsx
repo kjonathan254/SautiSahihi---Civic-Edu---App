@@ -38,6 +38,19 @@ const OfficeLocator: React.FC<Props> = ({ lang, t }) => {
     setSelectedCounty(e.target.value);
   };
 
+  const trackVisit = async (office: IEBCOffice) => {
+    hapticTap();
+    try {
+      await fetch('/api/locations/visit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId: `${office.county}-${office.constituency}` })
+      });
+    } catch (e) {
+      console.warn("Analytics failed", e);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="bg-[#135bec] p-10 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden">
@@ -136,6 +149,7 @@ const OfficeLocator: React.FC<Props> = ({ lang, t }) => {
                   <a 
                     href={`https://www.google.com/maps/search/IEBC+Office+${office.constituency}+${office.county}`} 
                     target="_blank" 
+                    onClick={() => trackVisit(office)}
                     className="py-6 bg-slate-50 dark:bg-slate-700 rounded-3xl flex items-center justify-center gap-3 font-black text-[#135bec] active:scale-95 transition-transform border-2 border-transparent hover:border-blue-100"
                   >
                     <span className="material-symbols-outlined text-3xl">directions</span> 

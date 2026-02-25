@@ -91,6 +91,20 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
     setSelectedTopic(null);
   };
 
+  const handleTopicSelect = async (topic: LearnTopic) => {
+    hapticTap();
+    setSelectedTopic(topic);
+    try {
+      await fetch('/api/track/learn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topicId: topic.id })
+      });
+    } catch (e) {
+      console.warn("Topic tracking failed", e);
+    }
+  };
+
   if (selectedTopic) {
     const isAiImage = topicImages[selectedTopic.id]?.startsWith('data:image');
     return (
@@ -195,7 +209,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
               <div className="p-10 space-y-6">
                 <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">{topic.summary}</p>
-                <button onClick={() => { hapticTap(); setSelectedTopic(topic); }} className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 border-2 border-[#135bec]/10">Read Story</button>
+                <button onClick={() => handleTopicSelect(topic)} className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 border-2 border-[#135bec]/10">Read Story</button>
               </div>
             </div>
           );

@@ -12,6 +12,7 @@ import Learn from './pages/Learn.tsx';
 import Assistant from './pages/Assistant.tsx';
 import Settings from './pages/Settings.tsx';
 import OfficeLocator from './pages/OfficeLocator.tsx';
+import Analytics from './pages/Analytics.tsx';
 
 const SautiLogo: React.FC<{ size?: string; className?: string }> = ({ size = "100%", className = "" }) => (
   <svg viewBox="0 0 400 400" className={className} style={{ width: size, height: size }}>
@@ -111,7 +112,8 @@ const App: React.FC = () => {
       case 'learn': return <Learn lang={lang} t={t} />;
       case 'assistant': return <Assistant lang={lang} t={t} />;
       case 'office-locator': return <OfficeLocator lang={lang} t={t} />;
-      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} t={t} onOpenKey={handleOpenKey} />;
+      case 'analytics': return <Analytics lang={lang} t={t} />;
+      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} t={t} onOpenKey={handleOpenKey} onNavigate={navigateTo} />;
       default: return <Home lang={lang} t={t} onNavigate={navigateTo} />;
     }
   };

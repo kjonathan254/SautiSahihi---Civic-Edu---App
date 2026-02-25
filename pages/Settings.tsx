@@ -10,9 +10,10 @@ interface Props {
   setDarkMode: (d: boolean) => void;
   t: TranslationSet;
   onOpenKey?: () => void;
+  onNavigate?: (tab: string) => void;
 }
 
-const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, onOpenKey }) => {
+const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, onOpenKey, onNavigate }) => {
   const languages: { code: AppLanguage; label: string }[] = [
     { code: 'ENG', label: 'English' },
     { code: 'KIS', label: 'Kiswahili' },
@@ -20,6 +21,20 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
     { code: 'DHO', label: 'Dholuo' },
     { code: 'LUH', label: 'Luhya' },
   ];
+
+  const handleLanguageChange = async (code: AppLanguage) => {
+    hapticTap();
+    setLang(code);
+    try {
+      await fetch('/api/track/language', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: code })
+      });
+    } catch (e) {
+      console.warn("Language tracking failed", e);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -45,7 +60,7 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
           {languages.map((l) => (
             <button
               key={l.code}
-              onClick={() => { hapticTap(); setLang(l.code); }}
+              onClick={() => handleLanguageChange(l.code)}
               className={`p-6 rounded-[2rem] text-left font-black text-2xl border-4 transition-all flex justify-between items-center ${
                 lang === l.code ? 'border-[#135bec] bg-blue-50 dark:bg-blue-900/30 text-[#135bec]' : 'border-white dark:border-gray-800 bg-white dark:bg-gray-800'
               }`}
@@ -76,6 +91,14 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
           </p>
         </div>
       </div>
+
+      <button 
+        onClick={() => onNavigate?.('analytics')}
+        className="w-full py-6 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all"
+      >
+        <span className="material-symbols-outlined">monitoring</span>
+        View Backend Analytics
+      </button>
     </div>
   );
 };

@@ -38,11 +38,17 @@ const Poll: React.FC<Props> = ({ lang, t }) => {
     fetchNews();
   }, [lang]);
 
-  const handleVote = (coalition: keyof PollResult) => {
+  const handleVote = async (coalition: keyof PollResult) => {
     if (voted) return;
     hapticSuccess();
     setPoll(prev => ({ ...prev, [coalition]: prev[coalition] + 1 }));
     setVoted(true);
+
+    try {
+      await fetch('/api/track/poll', { method: 'POST' });
+    } catch (e) {
+      console.warn("Poll tracking failed", e);
+    }
   };
 
   const total = poll.coalitionA + poll.movementB + poll.allianceC;

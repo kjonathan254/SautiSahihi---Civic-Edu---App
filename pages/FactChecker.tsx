@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppLanguage, TranslationSet, FactCheckResult, Verdict, GroundingLink } from '../types.ts';
 import { factCheckClaim, speakText } from '../geminiService.ts';
 import { fileToBase64, hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
@@ -26,6 +26,21 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
     }
   };
 
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch('/api/fact-checks');
+        const data = await res.json();
+        setHistory(data);
+      } catch (e) {
+        console.warn("Failed to fetch history", e);
+      }
+    };
+    fetchHistory();
+  }, [result]);
+
   const handleCheck = async () => {
     if (!claim && !image) return;
     hapticTap();
@@ -36,6 +51,21 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
       // Primary Fact Check via Gemini
       const res = await factCheckClaim(claim, image || undefined, lang);
       setResult(res);
+
+      // Save to backend
+      try {
+        await fetch('/api/fact-checks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            claim: claim || (image ? "Image-based claim" : "Unknown"),
+            verdict: res.verdict,
+            explanation: res.explanation
+          })
+        });
+      } catch (saveErr) {
+        console.warn("Failed to save fact-check to history", saveErr);
+      }
 
       if (res.verdict === Verdict.TRUE) hapticSuccess();
       else hapticWarning();
@@ -182,6 +212,33 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
                  <span className="material-symbols-outlined">help</span> Ask for Help
                </button>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {history.length > 0 && !result && (
+        <div className="space-y-6 pt-10 animate-in fade-in duration-700">
+          <div className="flex items-center gap-3 px-4">
+            <span className="material-symbols-outlined text-slate-400">history</span>
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-400">Recent Community Checks</h3>
+          </div>
+          <div className="space-y-4">
+            {history.map((item) => (
+              <div key={item.id} className="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] shadow-lg border-2 border-slate-50 dark:border-slate-700 space-y-3">
+                <div className="flex justify-between items-start">
+                  <p className="text-xl font-black text-slate-800 dark:text-white line-clamp-1 italic">"{item.claim}"</p>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    item.verdict === Verdict.TRUE ? 'bg-emerald-100 text-emerald-700' :
+                    item.verdict === Verdict.FALSE ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {item.verdict}
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {item.explanation}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       )}
