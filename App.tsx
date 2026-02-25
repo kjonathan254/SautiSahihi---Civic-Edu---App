@@ -34,10 +34,12 @@ const SautiLogo: React.FC<{ size?: string; className?: string }> = ({ size = "10
 );
 
 const KENYAN_CONTEXT_IMAGES = [
-  "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&q=80&w=1200",
-  "https://images.unsplash.com/photo-1547921608-8e6ca6f076f8?auto=format&fit=crop&q=80&w=1200",
-  "https://images.unsplash.com/photo-1531058284747-5804182d4399?auto=format&fit=crop&q=80&w=1200",
-  "https://images.unsplash.com/photo-1509059852496-f3822ae057bf?auto=format&fit=crop&q=80&w=1200"
+  "/assets/The Power of Patience.png",
+  "/assets/The Seal of Duty.png",
+  "/assets/Your Choice, Your Voice.png",
+  "/assets/Peaceful Progress.png",
+  "/assets/Voter Registration 2026.png",
+  "/assets/Your Rights as a Senior.png"
 ];
 
 const App: React.FC = () => {
@@ -124,7 +126,13 @@ const App: React.FC = () => {
     return (
       <div className="relative flex flex-col items-center justify-center h-screen overflow-hidden bg-black font-sans">
         {KENYAN_CONTEXT_IMAGES.map((img, idx) => (
-          <div key={idx} className={`absolute inset-0 transition-all duration-[3000ms] ${currentSlide === idx ? 'opacity-60' : 'opacity-0'}`} style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          <img 
+            key={idx} 
+            src={img} 
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ${currentSlide === idx ? 'opacity-60' : 'opacity-0'}`} 
+            referrerPolicy="no-referrer" 
+            alt="Kenya Context"
+          />
         ))}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
         <div className="relative z-10 w-full max-w-sm px-6 text-center space-y-8 animate-in fade-in duration-700">

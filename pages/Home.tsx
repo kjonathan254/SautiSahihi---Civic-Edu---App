@@ -145,7 +145,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
 
       <div className="relative aspect-[16/9] rounded-[4rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] bg-slate-950 border-4 border-white dark:border-slate-800">
         {heroImages[activeMood] ? (
-          <img src={heroImages[activeMood]} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${isGeneratingHero ? 'opacity-30' : 'opacity-100'}`} alt="Generated Civic Vision" />
+          <img src={heroImages[activeMood]} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${isGeneratingHero ? 'opacity-30' : 'opacity-100'}`} alt="Generated Civic Vision" referrerPolicy="no-referrer" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-black" />
         )}
@@ -219,12 +219,19 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
       </section>
 
       <div className="flex flex-wrap gap-3 px-2 justify-center">
-         {ELECTION_MOODS.map(mood => (
-           <button key={mood.id} onClick={() => handleMoodChange(mood.id)} className={`flex items-center gap-3 px-6 py-4 rounded-full transition-all border-2 font-black uppercase text-[10px] tracking-widest ${activeMood === mood.id ? 'bg-[#135bec] border-[#135bec] text-white shadow-xl scale-105' : 'bg-white dark:bg-gray-800 border-white dark:border-gray-700 text-gray-400 hover:border-blue-200'}`}>
-             <span className="material-symbols-outlined text-lg">{mood.icon}</span>
-             {mood.label}
-           </button>
-         ))}
+          {ELECTION_MOODS.map(mood => (
+            <button 
+              key={mood.id} 
+              onClick={() => handleMoodChange(mood.id)} 
+              className={`flex items-center gap-3 pl-2 pr-6 py-2 rounded-full transition-all border-2 font-black uppercase text-[10px] tracking-widest ${activeMood === mood.id ? 'bg-[#135bec] border-[#135bec] text-white shadow-xl scale-105' : 'bg-white dark:bg-gray-800 border-white dark:border-gray-700 text-gray-400 hover:border-blue-200'}`}
+            >
+              <div className="size-10 rounded-full overflow-hidden border-2 border-white/20 shrink-0">
+                <img src={mood.image} className="w-full h-full object-cover" alt={mood.label} referrerPolicy="no-referrer" />
+              </div>
+              <span className="material-symbols-outlined text-lg">{mood.icon}</span>
+              {mood.label}
+            </button>
+          ))}
       </div>
 
       <section className="bg-white dark:bg-slate-900 p-8 rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6 relative overflow-hidden">

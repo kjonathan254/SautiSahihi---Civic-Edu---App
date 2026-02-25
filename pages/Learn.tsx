@@ -121,7 +121,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
             </div>
           ) : (
             <>
-              <img src={topicImages[selectedTopic.id] || selectedTopic.image} alt={selectedTopic.title} className="w-full h-full object-cover" />
+              <img src={topicImages[selectedTopic.id] || selectedTopic.image} alt={selectedTopic.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               {!isAiImage && (
                 <button 
                   onClick={() => loadTopicImage(selectedTopic, true)}
@@ -190,7 +190,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
                   </div>
                 ) : (
                   <>
-                    <img src={topicImages[topic.id] || topic.image} className="w-full h-full object-cover" alt={topic.title} />
+                    <img src={topicImages[topic.id] || topic.image} className="w-full h-full object-cover" alt={topic.title} referrerPolicy="no-referrer" />
                     {!isAiImage && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); loadTopicImage(topic, true); }}

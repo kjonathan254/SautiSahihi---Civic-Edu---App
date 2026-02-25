@@ -33,7 +33,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   try {
     const aiRefiner = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
     const refinement = await aiRefiner.models.generateContent({
-      model: 'gemini-2.5-flash-lite-latest',
+      model: 'gemini-flash-lite-latest',
       contents: [{ role: 'user', parts: [{ text: `Create a 1-sentence cinematic photo prompt for: "${prompt}". Focus on: Kenyan citizens, realistic lighting, Nairobi atmosphere, high dignity. Context: ${context || 'Kenyan civic life'}. Style: Photorealistic 8k.` }] }]
     });
     if (refinement.text) refinedPrompt = refinement.text;
@@ -45,7 +45,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: 'gemini-2.5-flash-image',
       contents: [{ role: 'user', parts: [{ text: refinedPrompt }] }],
       config: { imageConfig: { aspectRatio: "16:9" } }
     });
@@ -67,7 +67,7 @@ export async function fastAIResponse(prompt: string): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite-latest',
+      model: 'gemini-flash-lite-latest',
       contents: [{ role: 'user', parts: [{ text: prompt }] }]
     });
     return response.text || "No response.";
