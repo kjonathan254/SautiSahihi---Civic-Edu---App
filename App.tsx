@@ -34,12 +34,12 @@ const SautiLogo: React.FC<{ size?: string; className?: string }> = ({ size = "10
 );
 
 const KENYAN_CONTEXT_IMAGES = [
-  "/assets/The Power of Patience.png",
-  "/assets/The Seal of Duty.png",
-  "/assets/Your Choice, Your Voice.png",
-  "/assets/Peaceful Progress.png",
-  "/assets/Voter Registration 2026.png",
-  "/assets/Your Rights as a Senior.png"
+  "/assets/ThePowerOfPatience.png",
+  "/assets/TheSealOfDuty.png",
+  "/assets/YourChoiceYourVoice.png",
+  "/assets/PeacefulProgress.png",
+  "/assets/VoterRegistration2026.png",
+  "/assets/YourRightsAsASenior.png"
 ];
 
 const App: React.FC = () => {
