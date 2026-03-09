@@ -12,6 +12,99 @@
         font-family: 'Inter', sans-serif;
         font-size: 18px; /* Large default for seniors */
         -webkit-tap-highlight-color: transparent;
+        transition: font-size 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+      }
+      .large-text {
+        font-size: 22px !important;
+      }
+      .large-text h1 { font-size: 4rem !important; }
+      .large-text h2 { font-size: 3.5rem !important; }
+      .large-text h3 { font-size: 3rem !important; }
+      .large-text p { font-size: 1.8rem !important; line-height: 1.4 !important; }
+      .large-text .text-xs, 
+      .large-text .text-[10px], 
+      .large-text .text-[9px], 
+      .large-text .text-[8px] { 
+        font-size: 1.2rem !important; 
+        letter-spacing: 0.05em !important;
+      }
+      .large-text .text-sm { font-size: 1.3rem !important; }
+      .large-text .text-lg { font-size: 2rem !important; }
+      .large-text .text-xl { font-size: 2.2rem !important; }
+      .large-text .text-2xl { font-size: 2.5rem !important; }
+      .large-text .text-3xl { font-size: 3rem !important; }
+      .large-text .text-4xl { font-size: 3.5rem !important; }
+      .large-text .text-5xl { font-size: 4rem !important; }
+      .large-text .material-symbols-outlined { font-size: 1.5em !important; }
+
+      .high-contrast {
+        background-color: #000 !important;
+        color: #fff !important;
+      }
+      .high-contrast * {
+        border-color: #fff !important;
+        outline-color: #fff !important;
+      }
+      .high-contrast .bg-white, 
+      .high-contrast .bg-gray-50, 
+      .high-contrast .bg-slate-50,
+      .high-contrast .bg-blue-50,
+      .high-contrast .bg-emerald-50,
+      .high-contrast .bg-amber-50,
+      .high-contrast .bg-red-50,
+      .high-contrast .bg-slate-100,
+      .high-contrast .bg-gray-100 {
+        background-color: #000 !important;
+        border: 2px solid #fff !important;
+      }
+      .high-contrast .text-gray-900,
+      .high-contrast .text-slate-900,
+      .high-contrast .text-gray-700,
+      .high-contrast .text-gray-500,
+      .high-contrast .text-slate-500,
+      .high-contrast .text-slate-400,
+      .high-contrast .text-gray-400 {
+        color: #fff !important;
+        opacity: 1 !important;
+      }
+      .high-contrast .text-[#135bec],
+      .high-contrast .text-blue-600,
+      .high-contrast .text-emerald-600,
+      .high-contrast .text-amber-600,
+      .high-contrast .text-rose-600,
+      .high-contrast .text-red-600 {
+        color: #ffff00 !important; /* Bright yellow for visibility on black */
+        text-decoration: underline !important;
+        font-weight: 900 !important;
+      }
+      .high-contrast .bg-[#135bec],
+      .high-contrast .bg-emerald-600,
+      .high-contrast .bg-amber-500,
+      .high-contrast .bg-rose-600,
+      .high-contrast .bg-red-600,
+      .high-contrast .bg-slate-900 {
+        background-color: #fff !important;
+        color: #000 !important;
+        border: 3px solid #000 !important;
+      }
+      .high-contrast .bg-[#135bec] *,
+      .high-contrast .bg-emerald-600 *,
+      .high-contrast .bg-amber-500 *,
+      .high-contrast .bg-rose-600 *,
+      .high-contrast .bg-red-600 *,
+      .high-contrast .bg-slate-900 * {
+        color: #000 !important;
+      }
+      .high-contrast button {
+        border: 3px solid #fff !important;
+      }
+      .high-contrast input, .high-contrast textarea, .high-contrast select {
+        background-color: #000 !important;
+        color: #fff !important;
+        border: 3px solid #fff !important;
+      }
+      .high-contrast .shadow-xl, .high-contrast .shadow-2xl, .high-contrast .shadow-lg {
+        box-shadow: none !important;
       }
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;

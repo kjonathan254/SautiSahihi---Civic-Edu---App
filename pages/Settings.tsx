@@ -8,6 +8,10 @@ interface Props {
   setLang: (l: AppLanguage) => void;
   darkMode: boolean;
   setDarkMode: (d: boolean) => void;
+  largeText: boolean;
+  setLargeText: (l: boolean) => void;
+  highContrast: boolean;
+  setHighContrast: (h: boolean) => void;
   t: TranslationSet;
   onOpenKey?: () => void;
   onNavigate?: (tab: string) => void;
@@ -15,7 +19,7 @@ interface Props {
   setIsAdmin: (a: boolean) => void;
 }
 
-const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, onOpenKey, onNavigate, isAdmin, setIsAdmin }) => {
+const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, largeText, setLargeText, highContrast, setHighContrast, t, onOpenKey, onNavigate, isAdmin, setIsAdmin }) => {
   const [tapCount, setTapCount] = useState(0);
 
   const handleVersionTap = () => {
@@ -96,6 +100,32 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, t, on
           className={`w-20 h-10 rounded-full transition-all relative ${darkMode ? 'bg-[#135bec]' : 'bg-gray-200'}`}
         >
           <div className={`size-8 bg-white rounded-full absolute top-1 transition-all ${darkMode ? 'left-11' : 'left-1'}`} />
+        </button>
+      </section>
+
+      <section className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between border-4 border-white dark:border-gray-800">
+        <div>
+          <h3 className="text-2xl font-black">Large Text</h3>
+          <p className="text-sm font-bold opacity-60 italic">Easier to read for seniors.</p>
+        </div>
+        <button
+          onClick={() => { hapticTap(); setLargeText(!largeText); }}
+          className={`w-20 h-10 rounded-full transition-all relative ${largeText ? 'bg-[#135bec]' : 'bg-gray-200'}`}
+        >
+          <div className={`size-8 bg-white rounded-full absolute top-1 transition-all ${largeText ? 'left-11' : 'left-1'}`} />
+        </button>
+      </section>
+
+      <section className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl flex items-center justify-between border-4 border-white dark:border-gray-800">
+        <div>
+          <h3 className="text-2xl font-black">High Contrast</h3>
+          <p className="text-sm font-bold opacity-60 italic">Maximum visibility.</p>
+        </div>
+        <button
+          onClick={() => { hapticTap(); setHighContrast(!highContrast); }}
+          className={`w-20 h-10 rounded-full transition-all relative ${highContrast ? 'bg-[#135bec]' : 'bg-gray-200'}`}
+        >
+          <div className={`size-8 bg-white rounded-full absolute top-1 transition-all ${highContrast ? 'left-11' : 'left-1'}`} />
         </button>
       </section>
 

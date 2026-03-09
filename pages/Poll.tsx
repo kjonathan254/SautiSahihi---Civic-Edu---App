@@ -146,7 +146,7 @@ const VoteCard: React.FC<VoteCardProps> = ({ name, color, percent, count, disabl
     {!disabled && (
       <button
         onClick={onVote}
-        className={`w-full py-3 mt-1 rounded-xl font-bold border-2 transition-all active:scale-95 ${color.replace('bg-', 'border-')} ${color.replace('bg-', 'text-')}`}
+        className={`w-full py-6 mt-2 rounded-[2rem] font-black text-2xl border-4 transition-all active:scale-95 shadow-lg ${color.replace('bg-', 'border-')} ${color.replace('bg-', 'text-')} hover:bg-opacity-10`}
       >
         {t.voteNow}
       </button>

@@ -165,26 +165,26 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
                </div>
             </div>
 
-            <div className="flex flex-col items-center text-center space-y-4 mb-8">
-              <span className={`material-symbols-outlined text-[6rem] ${
+            <div className="flex flex-col items-center text-center space-y-6 mb-10">
+              <span className={`material-symbols-outlined text-[10rem] ${
                 result.verdict === Verdict.TRUE ? 'text-emerald-600' : result.verdict === Verdict.FALSE ? 'text-red-600' : 'text-amber-600'
               }`}>
                 {result.verdict === Verdict.TRUE ? 'verified' : result.verdict === Verdict.FALSE ? 'error' : 'warning'}
               </span>
-              <h3 className="text-5xl font-black uppercase tracking-tighter">{result.verdict}</h3>
-              <p className="text-2xl font-black italic opacity-80">{result.summary}</p>
+              <h3 className="text-6xl font-black uppercase tracking-tighter">{result.verdict}</h3>
+              <p className="text-3xl font-black italic opacity-90 leading-tight">{result.summary}</p>
             </div>
             
             <div className="space-y-6">
-              <div className="bg-white/50 p-6 rounded-3xl">
-                <p className="font-black uppercase text-xs text-gray-400 mb-2 tracking-widest">{t.explanation}</p>
-                <p className="text-xl leading-relaxed font-bold">{result.explanation}</p>
+              <div className="bg-white/50 p-8 rounded-[2.5rem] border-2 border-black/5">
+                <p className="font-black uppercase text-sm text-gray-500 mb-3 tracking-widest">{t.explanation}</p>
+                <p className="text-2xl leading-relaxed font-bold text-slate-800">{result.explanation}</p>
                 
                 <button 
                   onClick={readVerdict}
-                  className={`mt-4 flex items-center gap-2 font-black text-[#135bec] py-2 px-4 rounded-xl border-2 border-blue-100 ${isReading ? 'animate-pulse bg-blue-50' : ''}`}
+                  className={`mt-6 w-full flex items-center justify-center gap-3 font-black text-2xl text-[#135bec] py-4 px-6 rounded-2xl border-4 border-blue-100 ${isReading ? 'animate-pulse bg-blue-50' : 'bg-white'}`}
                 >
-                  <span className="material-symbols-outlined">{isReading ? 'graphic_eq' : 'volume_up'}</span>
+                  <span className="material-symbols-outlined text-3xl">{isReading ? 'graphic_eq' : 'volume_up'}</span>
                   Listen to Explanation
                 </button>
               </div>

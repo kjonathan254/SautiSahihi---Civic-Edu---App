@@ -201,15 +201,15 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
     <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-500 max-w-2xl mx-auto px-2">
       
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4 p-2 bg-blue-50 dark:bg-slate-800 rounded-full pr-6">
-          <div className="size-16 bg-[#135bec] rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-            <span className="material-symbols-outlined text-white text-4xl filled">face</span>
+        <div className="flex items-center gap-6 p-3 bg-blue-50 dark:bg-slate-800 rounded-[2.5rem] pr-8">
+          <div className="size-20 bg-[#135bec] rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+            <span className="material-symbols-outlined text-white text-5xl filled">face</span>
           </div>
           <div>
-            <h2 className="text-xl font-black text-[#135bec]">{t.assistant}</h2>
-            <div className="flex items-center gap-1.5">
-               <div className={`size-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <h2 className="text-2xl font-black text-[#135bec]">{t.assistant}</h2>
+            <div className="flex items-center gap-2">
+               <div className={`size-3 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+               <span className="text-xs font-black uppercase tracking-widest text-slate-500">
                  {isOnline ? 'Live Assistant' : 'Offline Mode'}
                </span>
             </div>
@@ -241,9 +241,9 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
         ) : (
           <div className="w-full bg-white dark:bg-slate-800 rounded-[3.5rem] p-8 sm:p-12 shadow-2xl border-4 border-blue-50 dark:border-slate-700 animate-in zoom-in-95 duration-500 relative overflow-hidden">
             {messages.length > 1 && messages[messages.length-2].role === 'user' && (
-              <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-blue-300">
-                <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Your Question</p>
-                <p className="text-lg font-bold text-slate-600 dark:text-slate-300 italic">"{messages[messages.length-2].text}"</p>
+              <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border-l-8 border-blue-300">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Your Question</p>
+                <p className="text-2xl font-bold text-slate-700 dark:text-slate-200 italic leading-tight">"{messages[messages.length-2].text}"</p>
               </div>
             )}
 

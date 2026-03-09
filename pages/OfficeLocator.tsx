@@ -62,9 +62,9 @@ const OfficeLocator: React.FC<Props> = ({ lang, t }) => {
       </div>
 
       <div className="bg-white dark:bg-slate-900 p-6 rounded-[3rem] shadow-2xl border-4 border-slate-50 dark:border-slate-800 space-y-4">
-        <div className="flex items-center gap-3 px-3">
-           <span className="material-symbols-outlined text-[#135bec] filled">travel_explore</span>
-           <span className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">Search for your Office</span>
+        <div className="flex items-center gap-4 px-4">
+           <span className="material-symbols-outlined text-[#135bec] text-4xl filled">travel_explore</span>
+           <span className="text-lg font-black uppercase tracking-[0.2em] text-slate-500">Search for your Office</span>
         </div>
 
         <div className="space-y-4">
@@ -109,36 +109,36 @@ const OfficeLocator: React.FC<Props> = ({ lang, t }) => {
                 key={`${office.constituency}-${idx}`}
                 className="bg-white dark:bg-gray-800 p-8 rounded-[3.5rem] shadow-xl border-2 border-slate-50 dark:border-slate-700 flex flex-col gap-6"
               >
-                <div className="flex justify-between items-start border-b-2 border-slate-50 dark:border-slate-700 pb-5">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">{office.county} County</p>
-                    <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{office.constituency}</h3>
+                <div className="flex justify-between items-start border-b-4 border-slate-50 dark:border-slate-700 pb-6">
+                  <div className="space-y-2">
+                    <p className="text-xs font-black uppercase text-emerald-600 tracking-widest">{office.county} County</p>
+                    <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{office.constituency}</h3>
                   </div>
-                  <div className="bg-emerald-600 text-white px-5 py-2.5 rounded-full shadow-lg">
-                     <p className="text-lg font-black text-center">{office.distance}</p>
+                  <div className="bg-emerald-600 text-white px-6 py-3 rounded-full shadow-xl border-2 border-white/20">
+                     <p className="text-xl font-black text-center">{office.distance}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-start gap-5">
-                    <div className="size-14 bg-[#135bec]/10 rounded-2xl flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[#135bec] text-3xl">corporate_fare</span>
+                  <div className="flex items-start gap-6">
+                    <div className="size-16 bg-[#135bec]/10 rounded-[1.5rem] flex items-center justify-center shrink-0 border-2 border-blue-50">
+                      <span className="material-symbols-outlined text-[#135bec] text-4xl">corporate_fare</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Office Location</p>
-                      <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 leading-tight">
+                    <div className="space-y-2">
+                      <p className="text-xs font-black uppercase text-slate-400 tracking-widest">Office Location</p>
+                      <p className="text-3xl font-bold text-slate-800 dark:text-slate-200 leading-tight">
                         {office.location}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-5">
-                    <div className="size-14 bg-amber-500/10 rounded-2xl flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-amber-600 text-3xl">signpost</span>
+                  <div className="flex items-start gap-6">
+                    <div className="size-16 bg-amber-500/10 rounded-[1.5rem] flex items-center justify-center shrink-0 border-2 border-amber-50">
+                      <span className="material-symbols-outlined text-amber-600 text-4xl">signpost</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Notable Landmark</p>
-                      <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 leading-tight italic">
+                    <div className="space-y-2">
+                      <p className="text-xs font-black uppercase text-slate-400 tracking-widest">Notable Landmark</p>
+                      <p className="text-3xl font-bold text-slate-800 dark:text-slate-200 leading-tight italic">
                         {office.landmark}
                       </p>
                     </div>

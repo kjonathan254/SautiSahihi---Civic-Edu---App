@@ -132,11 +132,11 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
               )}
             </>
           )}
-          <div className="absolute top-6 left-6 flex flex-col gap-2">
-            <div className="bg-[#135bec] text-white px-6 py-2 rounded-full text-xs font-black uppercase shadow-lg">{selectedTopic.category}</div>
+          <div className="absolute top-6 left-6 flex flex-col gap-3">
+            <div className="bg-[#135bec] text-white px-8 py-3 rounded-full text-sm font-black uppercase shadow-lg border-2 border-white/20">{selectedTopic.category}</div>
             {isAiImage && (
-              <div className="bg-emerald-500/90 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase shadow-lg flex items-center gap-2">
-                <span className="material-symbols-outlined text-xs filled">verified</span> AI GENERATED
+              <div className="bg-emerald-500/90 text-white px-6 py-2 rounded-full text-xs font-black uppercase shadow-lg flex items-center gap-2 border-2 border-white/20">
+                <span className="material-symbols-outlined text-sm filled">verified</span> AI GENERATED
               </div>
             )}
           </div>
@@ -201,9 +201,9 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
                     )}
                   </>
                 )}
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <div className="bg-[#135bec] text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">{topic.category}</div>
-                  {isAiImage && <div className="bg-emerald-500/90 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5 w-fit"><span className="material-symbols-outlined text-[10px] filled">verified</span>AI GENERATED</div>}
+                <div className="absolute top-6 left-6 flex flex-col gap-3">
+                  <div className="bg-[#135bec] text-white px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl border-2 border-white/20">{topic.category}</div>
+                  {isAiImage && <div className="bg-emerald-500/90 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 w-fit border-2 border-white/20"><span className="material-symbols-outlined text-xs filled">verified</span>AI GENERATED</div>}
                 </div>
               </div>
               <div className="p-10 space-y-6">

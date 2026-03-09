@@ -49,14 +49,25 @@ const App: React.FC = () => {
   const [hasKey, setHasKey] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
+  const [largeText, setLargeText] = useState(() => localStorage.getItem('largeText') === 'true');
+  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('highContrast') === 'true');
 
   useEffect(() => {
     localStorage.setItem('lang', lang);
     localStorage.setItem('darkMode', darkMode.toString());
     localStorage.setItem('isAdmin', isAdmin.toString());
+    localStorage.setItem('largeText', largeText.toString());
+    localStorage.setItem('highContrast', highContrast.toString());
+
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
-  }, [lang, darkMode, isAdmin]);
+
+    if (largeText) document.documentElement.classList.add('large-text');
+    else document.documentElement.classList.remove('large-text');
+
+    if (highContrast) document.documentElement.classList.add('high-contrast');
+    else document.documentElement.classList.remove('high-contrast');
+  }, [lang, darkMode, isAdmin, largeText, highContrast]);
 
   useEffect(() => {
     if (!hasKey) {
@@ -117,7 +128,7 @@ const App: React.FC = () => {
       case 'assistant': return <Assistant lang={lang} t={t} />;
       case 'office-locator': return <OfficeLocator lang={lang} t={t} />;
       case 'analytics': return <Analytics lang={lang} t={t} />;
-      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} t={t} onOpenKey={handleOpenKey} onNavigate={navigateTo} isAdmin={isAdmin} setIsAdmin={setIsAdmin} />;
+      case 'settings': return <Settings lang={lang} setLang={setLang} darkMode={darkMode} setDarkMode={setDarkMode} largeText={largeText} setLargeText={setLargeText} highContrast={highContrast} setHighContrast={setHighContrast} t={t} onOpenKey={handleOpenKey} onNavigate={navigateTo} isAdmin={isAdmin} setIsAdmin={setIsAdmin} />;
       default: return <Home lang={lang} t={t} onNavigate={navigateTo} />;
     }
   };
@@ -164,23 +175,23 @@ const App: React.FC = () => {
         </div>
       </header>
       <main className="flex-1 overflow-y-auto pb-40"><div className="max-w-3xl mx-auto p-4">{renderContent()}</div></main>
-      <nav className={`fixed bottom-0 left-0 right-0 border-t p-2 z-50 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
-        <div className="max-w-3xl mx-auto flex justify-around items-center h-20">
-          <NavItem active={activeTab === 'home'} icon="home" label={t.home} onClick={() => navigateTo('home')} />
-          <NavItem active={activeTab === 'fact-checker'} icon="fact_check" label={t.factChecker} onClick={() => navigateTo('fact-checker')} />
-          <NavItem active={activeTab === 'office-locator'} icon="location_on" label={t.iebcLocator} onClick={() => navigateTo('office-locator')} />
-          <NavItem active={activeTab === 'learn'} icon="school" label={t.learn} onClick={() => navigateTo('learn')} />
-          <NavItem active={activeTab === 'assistant'} icon="voice_chat" label={t.assistant} onClick={() => navigateTo('assistant')} />
+      <nav className={`fixed bottom-0 left-0 right-0 border-t p-2 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
+        <div className="max-w-3xl mx-auto flex justify-around items-center h-24">
+          <NavItem active={activeTab === 'home'} icon="home" label={t.home} onClick={() => navigateTo('home')} highContrast={highContrast} />
+          <NavItem active={activeTab === 'fact-checker'} icon="fact_check" label={t.factChecker} onClick={() => navigateTo('fact-checker')} highContrast={highContrast} />
+          <NavItem active={activeTab === 'office-locator'} icon="location_on" label={t.iebcLocator} onClick={() => navigateTo('office-locator')} highContrast={highContrast} />
+          <NavItem active={activeTab === 'learn'} icon="school" label={t.learn} onClick={() => navigateTo('learn')} highContrast={highContrast} />
+          <NavItem active={activeTab === 'assistant'} icon="voice_chat" label={t.assistant} onClick={() => navigateTo('assistant')} highContrast={highContrast} />
         </div>
       </nav>
     </div>
   );
 };
 
-const NavItem: React.FC<{ active: boolean; icon: string; label: string; onClick: () => void }> = ({ active, icon, label, onClick }) => (
-  <button onClick={onClick} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-2xl transition-all ${active ? 'bg-[#135bec]/10 text-[#135bec]' : 'text-gray-400'}`}>
-    <span className={`material-symbols-outlined text-4xl mb-0.5 ${active ? 'filled scale-110' : ''}`}>{icon}</span>
-    <span className="text-[9px] font-black uppercase tracking-tight">{label}</span>
+const NavItem: React.FC<{ active: boolean; icon: string; label: string; onClick: () => void; highContrast?: boolean }> = ({ active, icon, label, onClick, highContrast }) => (
+  <button onClick={onClick} className={`flex-1 flex flex-col items-center justify-center py-3 rounded-2xl transition-all ${active ? (highContrast ? 'bg-black text-white border-2 border-white' : 'bg-[#135bec] text-white shadow-lg scale-105') : (highContrast ? 'text-white font-bold' : 'text-gray-500')}`}>
+    <span className={`material-symbols-outlined text-5xl mb-1 ${active ? 'filled' : ''}`}>{icon}</span>
+    <span className="text-[11px] font-black uppercase tracking-tight">{label}</span>
   </button>
 );
 

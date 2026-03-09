@@ -149,9 +149,9 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-black" />
         )}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px]" />
         {isGeneratingHero && (
-          <div className="absolute top-4 right-10 z-20 flex items-center gap-2 bg-black/40 px-4 py-2 rounded-full border border-white/10">
+          <div className="absolute top-4 right-10 z-20 flex items-center gap-2 bg-black/60 px-4 py-2 rounded-full border border-white/20">
              <div className="size-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
              <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Generating Vision...</span>
           </div>
@@ -159,13 +159,13 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 space-y-4 z-10 text-center">
           <div className="size-20 mb-2 drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"><SautiLogo /></div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-lg">
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               {activeMood === 'queue' && "The Power of Patience"}
               {activeMood === 'ink' && "The Seal of Duty"}
               {activeMood === 'papers' && "Your Choice, Your Voice"}
               {activeMood === 'winner' && "Peaceful Progress"}
             </h1>
-            <p className="text-lg font-bold text-blue-300 opacity-90 leading-tight max-w-[85%] mx-auto drop-shadow-md">
+            <p className="text-xl font-bold text-blue-200 leading-tight max-w-[85%] mx-auto drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)]">
               {activeMood === 'queue' && "Queuing together as one Kenya, one people."}
               {activeMood === 'ink' && "Wear your mark of truth with dignity."}
               {activeMood === 'papers' && "Six choices to define our shared future."}
