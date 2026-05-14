@@ -109,6 +109,61 @@ async function startServer() {
     res.json(newEntry);
   });
 
+  // --- NVIDIA NIM Proxy Endpoints ---
+  // To secure the NVIDIA API Key, we proxy requests through the backend.
+  
+  app.post("/api/nvidia/chat", async (req, res) => {
+    const apiKey = process.env.NVIDIA_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "NVIDIA_API_KEY not configured on server." });
+    }
+
+    try {
+      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(req.body)
+      });
+
+      const result = await response.json();
+      res.status(response.status).json(result);
+    } catch (error) {
+      console.error("NVIDIA Chat Proxy Error:", error);
+      res.status(500).json({ error: "Failed to connect to NVIDIA API" });
+    }
+  });
+
+  app.post("/api/nvidia/image", async (req, res) => {
+    const apiKey = process.env.NVIDIA_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "NVIDIA_API_KEY not configured on server." });
+    }
+
+    // Default to Stable Diffusion XL on NVIDIA NIM if no specific model provided
+    const modelUrl = req.body.url || "https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-xl";
+    
+    try {
+      const response = await fetch(modelUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(req.body.payload)
+      });
+
+      const result = await response.json();
+      res.status(response.status).json(result);
+    } catch (error) {
+      console.error("NVIDIA Image Proxy Error:", error);
+      res.status(500).json({ error: "Failed to connect to NVIDIA Image API" });
+    }
+  });
+
   // --- Vite Middleware for Development ---
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

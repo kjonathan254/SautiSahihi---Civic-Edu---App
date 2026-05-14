@@ -25,10 +25,10 @@ export const IEBC_HQ_INFO = {
 };
 
 export const ELECTION_MOODS = [
-  { id: 'queue', label: 'The Patient Queue', icon: 'groups', image: '/assets/ThePowerOfPatience.png', prompt: "A hyper-realistic photograph of ONLY African/Kenyan citizens queuing peacefully at a Kenyan polling station." },
-  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', image: '/assets/TheSealOfDuty.png', prompt: "A sharp close-up of a Kenyan elder's hand featuring a bright purple indelible ink stain." },
-  { id: 'papers', label: 'The 6-Ballots', icon: 'style', image: '/assets/YourChoiceYourVoice.png', prompt: "An artistic flat-lay of the 6 official Kenyan ballot papers of different colors." },
-  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', image: '/assets/PeacefulProgress.png', prompt: "A joyful celebration in a vibrant Kenyan village square, waving small Kenyan flags." }
+  { id: 'queue', label: 'The Patient Queue', icon: 'groups', image: '/assets/ThePowerOfPatience.png', prompt: "Masterpiece hyper-realistic sharp-focus photograph of Kenyan citizens of diverse ages queuing peacefully at a village polling station. Golden hour sunlight, dust particles in the air, authentic Kenyan clothing, deep emotional resonance, 8k resolution." },
+  { id: 'ink', label: 'The Purple Finger', icon: 'done_all', image: '/assets/TheSealOfDuty.png', prompt: "Macro photography of an elderly Kenyan hand with visible wisdom lines, featuring a vivid purple indelible ink stain on the index finger. Soft bokeh background of a Kenyan landscape, high texture detail, cinematic lighting." },
+  { id: 'papers', label: 'The 6-Ballots', icon: 'style', image: '/assets/YourChoiceYourVoice.png', prompt: "Professional studio flat-lay of six official Kenyan ballot papers with distinct vibrant colors (Green, Yellow, White, etc.). Each paper has crisp text and the IEBC logo, arranged symmetrically on a rustic wooden table, high-contrast, elegant." },
+  { id: 'winner', label: 'Peaceful Victory', icon: 'celebration', image: '/assets/PeacefulProgress.png', prompt: "A cinematic wide shot of a multi-ethnic group of Kenyans celebrating in a Nairobi city square. Waving the Kenyan flag, joyful expressions, high motion detail, vibrant colors, majestic sky, patriotic and unified atmosphere." }
 ];
 
 export const LEARN_TOPICS: LearnTopic[] = [

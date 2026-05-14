@@ -44,7 +44,12 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   const [isReadingNews, setIsReadingNews] = useState(false);
   
   // Hero Image Generation State
-  const [heroImages, setHeroImages] = useState<Record<string, string>>({});
+  const [heroImages, setHeroImages] = useState<Record<string, string>>({
+    'queue': '/assets/ThePowerOfPatience.png',
+    'ink': '/assets/TheSealOfDuty.png',
+    'papers': '/assets/YourChoiceYourVoice.png',
+    'winner': '/assets/PeacefulProgress.png'
+  });
   const [isGeneratingHero, setIsGeneratingHero] = useState(false);
   
   // Quick Ask State
@@ -82,14 +87,18 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
 
   useEffect(() => {
     const fetchHeroImage = async () => {
-      if (heroImages[activeMood]) return;
+      // Only generate if we don't have an AI image already (AI images are base64)
+      if (heroImages[activeMood] && heroImages[activeMood].startsWith('data:')) return;
+      
       const moodObj = ELECTION_MOODS.find(m => m.id === activeMood);
       if (!moodObj) return;
+      
       setIsGeneratingHero(true);
       try {
-        // Passing moodObj.id as the second argument (topicId) and moodObj.image as fallback
         const img = await generateTopicImage(moodObj.prompt, moodObj.id, undefined, (moodObj as any).image);
-        setHeroImages(prev => ({ ...prev, [activeMood]: img }));
+        if (img && img !== (moodObj as any).image) {
+          setHeroImages(prev => ({ ...prev, [activeMood]: img }));
+        }
       } catch (err) {
         console.error("Failed to generate hero image", err);
       } finally {
@@ -226,7 +235,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
               className={`flex items-center gap-3 pl-2 pr-6 py-2 rounded-full transition-all border-2 font-black uppercase text-[10px] tracking-widest ${activeMood === mood.id ? 'bg-[#135bec] border-[#135bec] text-white shadow-xl scale-105' : 'bg-white dark:bg-gray-800 border-white dark:border-gray-700 text-gray-400 hover:border-blue-200'}`}
             >
               <div className="size-10 rounded-full overflow-hidden border-2 border-white/20 shrink-0">
-                <img src={mood.image} className="w-full h-full object-cover" alt={mood.label} referrerPolicy="no-referrer" />
+                <img src={heroImages[mood.id] || mood.image} className="w-full h-full object-cover" alt={mood.label} />
               </div>
               <span className="material-symbols-outlined text-lg">{mood.icon}</span>
               {mood.label}
