@@ -142,18 +142,17 @@ async function startServer() {
       return res.status(500).json({ error: "NVIDIA_API_KEY not configured on server." });
     }
 
-    // Default to Stable Diffusion XL on NVIDIA NIM if no specific model provided
-    const modelUrl = req.body.url || "https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-xl";
+    const { url, payload } = req.body;
     
     try {
-      const response = await fetch(modelUrl, {
+      const response = await fetch(url || "https://ai.api.nvidia.com/v1/stabilityai/stable-diffusion-xl", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify(req.body.payload)
+        body: JSON.stringify(payload)
       });
 
       const result = await response.json();

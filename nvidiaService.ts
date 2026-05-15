@@ -34,12 +34,14 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        url: "https://ai.api.nvidia.com/v1/genai/stabilityai/sdxl",
+        url: "https://ai.api.nvidia.com/v1/stabilityai/stable-diffusion-xl",
         payload: {
-          text_prompts: [{ text: enhancedPrompt }],
+          text_prompts: [{ text: enhancedPrompt, weight: 1 }],
           cfg_scale: 7,
           sampler: "K_DPM_2_ANCESTRAL",
-          steps: 30
+          steps: 30,
+          seed: 0,
+          style_preset: "photographic"
         }
       })
     });
