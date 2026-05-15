@@ -30,11 +30,11 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
     // Enhance prompt for NVIDIA's high-detail generation
     const enhancedPrompt = `${prompt}, photorealistic, 8k resolution, cinematic lighting, ultra-detailed, Kenyan authentic context, natural skin tones, depth of field`;
 
-    const response = await fetch("/api/nvidia/image", {
+    const response = await fetch("/api/generate-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        url: "https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-xl",
+        url: "https://ai.api.nvidia.com/v1/genai/stabilityai/sdxl",
         payload: {
           text_prompts: [{ text: enhancedPrompt }],
           cfg_scale: 7,
@@ -50,7 +50,16 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
     if (data.artifacts && data.artifacts[0].base64) {
       return `data:image/png;base64,${data.artifacts[0].base64}`;
     }
+
+    if (data.image) {
+       return `data:image/png;base64,${data.image}`;
+    }
+
+    if (data.data && data.data[0] && data.data[0].b64_json) {
+       return `data:image/png;base64,${data.data[0].b64_json}`;
+    }
     
+    console.error("NVIDIA Response Data (Missing Artifacts):", JSON.stringify(data));
     throw new Error("No image data returned from NVIDIA");
   } catch (error) {
     console.error("NVIDIA Image Generation Error:", error);

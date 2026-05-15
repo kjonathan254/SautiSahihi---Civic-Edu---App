@@ -136,7 +136,7 @@ async function startServer() {
     }
   });
 
-  app.post("/api/nvidia/image", async (req, res) => {
+  app.post("/api/generate-image", async (req, res) => {
     const apiKey = process.env.NVIDIA_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "NVIDIA_API_KEY not configured on server." });
@@ -157,6 +157,9 @@ async function startServer() {
       });
 
       const result = await response.json();
+      if (!response.ok) {
+        console.error("NVIDIA API Error Response:", JSON.stringify(result));
+      }
       res.status(response.status).json(result);
     } catch (error) {
       console.error("NVIDIA Image Proxy Error:", error);

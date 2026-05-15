@@ -73,7 +73,7 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
 export async function fastAIResponse(prompt: string): Promise<string> {
   // 1. Try NVIDIA First (High Speed)
   try {
-    const text = await nvidiaChat([{ role: 'user', content: prompt }], "meta/llama-4-maverick-17b-128e-instruct");
+    const text = await nvidiaChat([{ role: 'user', content: prompt }], "meta/llama-3.1-8b-instruct");
     if (text) return text;
   } catch (e) {
     console.warn("NVIDIA fast response failed, falling back to Gemini.");
@@ -185,7 +185,7 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   return buffer;
 }
 
-export async function fetchTTSBuffer(text: string, language: AppLanguage = 'ENG', voice: string = 'Kore'): Promise<AudioBuffer | null> {
+export async function fetchTTSBase64(text: string, language: AppLanguage = 'ENG'): Promise<string | null> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
@@ -193,10 +193,18 @@ export async function fetchTTSBuffer(text: string, language: AppLanguage = 'ENG'
       contents: [{ role: 'user', parts: [{ text }] }],
       config: { responseModalities: [Modality.AUDIO] },
     });
-    const b64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!b64) return null;
-    return await decodeAudioData(decode(b64), getAudioCtx(), 24000, 1);
+    return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
   } catch (e) { return null; }
+}
+
+export async function fetchTTSBuffer(text: string, language: AppLanguage = 'ENG'): Promise<AudioBuffer | null> {
+  const b64 = await fetchTTSBase64(text, language);
+  if (!b64) return null;
+  return await decodeAudioData(decode(b64), getAudioCtx(), 24000, 1);
+}
+
+export async function bufferFromBase64(b64: string): Promise<AudioBuffer | null> {
+  return await decodeAudioData(decode(b64), getAudioCtx(), 24000, 1);
 }
 
 export async function speakText(text: string, language: AppLanguage = 'ENG'): Promise<void> {
@@ -207,6 +215,23 @@ export async function speakText(text: string, language: AppLanguage = 'ENG'): Pr
   src.buffer = buf;
   src.connect(ctx.destination);
   return new Promise((r) => { src.onended = () => r(); src.start(); });
+}
+
+export async function getLearnTopicContent(topic: string, description: string, language: AppLanguage): Promise<{ summary: string, detailed: string }> {
+  try {
+    const prompt = `Act as an educational expert for Kenyan senior citizens. Explain the civic topic "${topic}" based on this context: "${description}". 
+    Create a concise 1-sentence summary and a detailed explanation (3-4 clear, respectful, and encouraging sentences).
+    Respond in ${language}. 
+    Use JSON format: { "summary": "...", "detailed": "..." }`;
+    
+    // Offload to NVIDIA Llama 3 for non-factual/educational enrichment
+    const response = await nvidiaChat([{ role: 'user', content: prompt }], "meta/llama-3.1-8b-instruct");
+    const cleaned = response.substring(response.indexOf('{'), response.lastIndexOf('}') + 1);
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error("Failed to enrich learn content with NVIDIA", e);
+    throw e;
+  }
 }
 
 export async function chatAssistant(message: string, language: AppLanguage, history: any[] = []): Promise<{text: string, links: GroundingLink[]}> {
