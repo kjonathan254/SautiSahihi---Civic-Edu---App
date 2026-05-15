@@ -213,9 +213,44 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationSet> = {
 };
 
 export const CIVIC_FAQS: Record<AppLanguage, { q: string, a: string }[]> = {
-  ENG: [{ q: "How do I register?", a: "Visit your local IEBC constituency office with your ID." }],
-  KIS: [{ q: "Ninawezaje kujiandikisha?", a: "Tembelea ofisi ya jimbo ya IEBC na kitambulisho chako." }],
-  GIK: [], DHO: [], LUH: []
+  ENG: [
+    { 
+      q: "How do I register?", 
+      a: "Visit your local IEBC constituency office with your National ID card or Passport. Registration is continuous throughout the year.\n\nSource:\nElections Act No. 24 of 2011\nSection 5" 
+    },
+    {
+      q: "What rights do I have at the polling station?",
+      a: "Every adult citizen has the right to vote by secret ballot and to be registered as a voter without unreasonable restrictions.\n\nSource:\nConstitution of Kenya 2010\nArticle 38"
+    }
+  ],
+  KIS: [
+    { 
+      q: "Ninawezaje kujiandikisha?", 
+      a: "Tembelea ofisi ya jiji ya IEBC ukiwa na kitambulisho chako cha Kitaifa au Pasipoti. Usajili unaendelea mwaka mzima.\n\nSource:\nSheria ya Uchaguzi Na. 24 ya 2011\nSehemu ya 5" 
+    },
+    {
+      q: "Nina haki gani katika kituo cha kupigia kura?",
+      a: "Kila raia mzee ana haki ya kupiga kura kwa siri na kusajiliwa kama mpiga kura bila vizuizi visivyo na sababu.\n\nSource:\nKatiba ya Kenya 2010\nIbara ya 38"
+    }
+  ],
+  GIK: [
+    {
+      q: "Njandikithagia atia?",
+      a: "Thiĩ ofisi-inĩ ya IEBC ya constituency yanyu na ID ya lobi kana Pasipoti. Kwandikithia nĩ kwa hinda ciothe.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
+    }
+  ],
+  DHO: [
+    {
+      q: "Andikora nade?",
+      a: "Dhi e ofis mar IEBC manie constituency ni ka iting'o ID ni kata Pasipoti. Ndiko kura dhiyo nyime kinde duto.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
+    }
+  ],
+  LUH: [
+    {
+      q: "Ndieyandikisa ruma?",
+      a: "Dhia eyofisi ya IEBC ya constituency yenyu nende ID yinye ya lobi nende Pasipoti. Khweyandikisa khuli khwa makhinda kosi.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
+    }
+  ]
 };
 
 export const IEBC_OFFICES: IEBCOffice[] = [

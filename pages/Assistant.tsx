@@ -56,31 +56,51 @@ const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
       return;
     }
 
-    const listMatch = trimmed.match(/^(\*|-|\d+\.)\s+(.*)/);
-    if (listMatch) {
-      currentList.push(
-        <li key={idx} className="flex gap-4 items-start bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-[2rem] border-2 border-blue-100/50">
-          <div className="size-8 bg-[#135bec] rounded-full flex items-center justify-center shrink-0 mt-1 shadow-lg">
-             <div className="size-3 bg-white rounded-full" />
-          </div>
-          <span className="text-2xl font-bold leading-tight text-slate-800 dark:text-slate-100">
-            {processEmphasis(listMatch[2])}
-          </span>
-        </li>
-      );
-    } else {
+    // Specialized styling for Source/Section citations
+    const isCitationHeader = /^(Source|Section|Article|Ibara|Sehemu|Vyanzo):/i.test(trimmed);
+    const isCitationContent = /^(Constitution|Elections Act|IEBC Act|Political Parties|Sheria)/i.test(trimmed) || (trimmed.startsWith('Article') || trimmed.startsWith('Section'));
+
+    if (isCitationHeader) {
       flushList();
       blocks.push(
-        <p key={idx} className="text-3xl font-black leading-tight text-slate-900 dark:text-white mb-6 last:mb-0">
-          {processEmphasis(trimmed)}
+        <p key={idx} className="text-sm font-black text-[#135bec] uppercase tracking-[0.2em] mt-8 mb-1 flex items-center gap-2">
+          <span className="material-symbols-outlined text-sm">history_edu</span> {trimmed}
         </p>
       );
+    } else if (isCitationContent && blocks.length > 0) {
+      flushList();
+      blocks.push(
+        <p key={idx} className="text-xl font-bold text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-900/50 p-4 border-l-4 border-blue-200 rounded-r-xl">
+          {trimmed}
+        </p>
+      );
+    } else {
+      const listMatch = trimmed.match(/^(\*|-|\d+\.)\s+(.*)/);
+      if (listMatch) {
+        currentList.push(
+          <li key={idx} className="flex gap-4 items-start bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-[2rem] border-2 border-blue-100/50">
+            <div className="size-8 bg-[#135bec] rounded-full flex items-center justify-center shrink-0 mt-1 shadow-lg">
+               <div className="size-3 bg-white rounded-full" />
+            </div>
+            <span className="text-2xl font-bold leading-tight text-slate-800 dark:text-slate-100">
+              {processEmphasis(listMatch[2])}
+            </span>
+          </li>
+        );
+      } else {
+        flushList();
+        blocks.push(
+          <p key={idx} className="text-3xl font-black leading-tight text-slate-900 dark:text-white mb-6 last:mb-0">
+            {processEmphasis(trimmed)}
+          </p>
+        );
+      }
     }
   });
 
   flushList();
 
-  return <div className="space-y-2">{blocks}</div>;
+  return <div className="space-y-1">{blocks}</div>;
 };
 
 const Assistant: React.FC<Props> = ({ lang, t }) => {

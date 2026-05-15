@@ -2,6 +2,7 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
 import { nvidiaChat, nvidiaGenerateImage } from './nvidiaService.ts';
+import { searchCivicKnowledge } from './lib/searchKnowledge.ts';
 
 // Singleton AudioContext
 let _audioCtx: AudioContext | null = null;
@@ -23,9 +24,11 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
 }
 
 export async function fastAIResponse(prompt: string): Promise<string> {
+  const enhancedPrompt = `${prompt}\n\nCRITICAL RULE: Always cite the specific legal source (e.g. Constitution of Kenya 2010) and Article/Section if applicable. If you are not sure, state that you are providing general information.`;
+
   // 1. Try NVIDIA First (High Speed)
   try {
-    const text = await nvidiaChat([{ role: 'user', content: prompt }], "meta/llama-3.1-8b-instruct");
+    const text = await nvidiaChat([{ role: 'user', content: enhancedPrompt }], "meta/llama-3.1-8b-instruct");
     if (text) return text;
   } catch (e) {
     console.warn("NVIDIA fast response failed, falling back to Gemini.");
@@ -36,7 +39,7 @@ export async function fastAIResponse(prompt: string): Promise<string> {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-flash-lite-latest',
-      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+      contents: [{ role: 'user', parts: [{ text: enhancedPrompt }] }]
     });
     return response.text || "No response.";
   } catch (e) {
@@ -48,10 +51,12 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
   let geminiResult: any = null;
   let groundingLinks: GroundingLink[] = [];
 
+  const citationRule = "\n\nCRITICAL RULE: Always cite the Source (e.g. Constitution of Kenya 2010) and Article/Section (e.g. Article 81) used for verification.";
+
   // 1. Try Gemini first because of Multimodal + Search Grounding
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
-    const prompt = `Fact-check this claim for a Kenyan audience: "${claim}". Respond in ${language}. Use JSON format. Structure: { verdict: "TRUE"|"FALSE"|"MISLEADING", summary: "Short one-liner", explanation: "Detailed reasoning", sources: ["source1", "source2"] }`;
+    const prompt = `Fact-check this claim for a Kenyan audience: "${claim}". Respond in ${language}. Use JSON format. Structure: { verdict: "TRUE"|"FALSE"|"MISLEADING", summary: "Short one-liner", explanation: "Detailed reasoning", sources: ["source1", "source2"] } ${citationRule}`;
     const contents: any[] = [{ role: 'user', parts: [{ text: prompt }] }];
     if (imageBase64) {
       contents[0].parts.push({ inlineData: { data: imageBase64.split(',')[1], mimeType: 'image/png' } });
@@ -75,8 +80,8 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
   // 2. If Gemini failed OR for Cross-Verification
   try {
     const checkPrompt = geminiResult 
-      ? `Verify this fact-check result for accuracy: Claim: "${claim}", Verdict: "${geminiResult.verdict}", Explanation: "${geminiResult.explanation}". Refine it for a Kenyan context. Respond in JSON.`
-      : `Fact-check this Kenyan claim: "${claim}". Respond in ${language} using this JSON structure: { verdict: "TRUE"|"FALSE"|"MISLEADING", summary: "one-liner", explanation: "detailed reasoning", sources: [] }.`;
+      ? `Verify this fact-check result for accuracy: Claim: "${claim}", Verdict: "${geminiResult.verdict}", Explanation: "${geminiResult.explanation}". Refine it for a Kenyan context. Respond in JSON. ${citationRule}`
+      : `Fact-check this Kenyan claim: "${claim}". Respond in ${language} using this JSON structure: { verdict: "TRUE"|"FALSE"|"MISLEADING", summary: "one-liner", explanation: "detailed reasoning", sources: [] }. ${citationRule}`;
     
     const nvidiaResponse = await nvidiaChat([{ role: "user", content: checkPrompt }]);
     if (nvidiaResponse) {
@@ -100,7 +105,7 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: [{ role: 'user', parts: [{ text: `Provide a 2-sentence factual update on Kenyan civic news in ${language}. Include dates if possible.` }] }],
+      contents: [{ role: 'user', parts: [{ text: `Provide a 2-sentence factual update on Kenyan civic news in ${language}. Include dates if possible. Briefly mention the source if applicable.` }] }],
       config: { tools: [{ googleSearch: {} }] }
     });
     if (response.text) return `[LATEST NEWS] ${response.text}`;
@@ -171,8 +176,17 @@ export async function speakText(text: string, language: AppLanguage = 'ENG'): Pr
 
 export async function getLearnTopicContent(topic: string, description: string, language: AppLanguage): Promise<{ summary: string, detailed: string }> {
   try {
+    const localResults = searchCivicKnowledge(topic + " " + description);
+    const context = localResults.length > 0
+      ? `\n\nLegal Basis:\n${localResults.slice(0, 1).map(r => `Source: ${r.source}\nSection: ${r.section}`).join('\n')}`
+      : "";
+
     const prompt = `Act as an educational expert for Kenyan senior citizens. Explain the civic topic "${topic}" based on this context: "${description}". 
     Create a concise 1-sentence summary and a detailed explanation (3-4 clear, respectful, and encouraging sentences).
+    
+    CRITICAL RULE: You must include a "Source" and "Section/Article" at the end of the explanation if it relates to Kenyan law.
+    ${context}
+
     Respond in ${language}. 
     Use JSON format: { "summary": "...", "detailed": "..." }`;
     
@@ -187,10 +201,26 @@ export async function getLearnTopicContent(topic: string, description: string, l
 }
 
 export async function chatAssistant(message: string, language: AppLanguage, history: any[] = []): Promise<{text: string, links: GroundingLink[]}> {
+  // 0. Search local knowledge base
+  const localResults = searchCivicKnowledge(message);
+  const context = localResults.length > 0 
+    ? `\n\nRelevant Legal Information to guide your answer:\n${localResults.slice(0, 2).map(r => `Source: ${r.source}\nSection: ${r.section}\nContent: ${r.content}`).join('\n\n')}`
+    : "";
+
+  const systemPrompt = `You are SautiSahihi, a dignified and truthful civic assistant for Kenya. Respond in ${language}. Use clear, senior-friendly language. Provide factual information about laws, voting, and rights.
+  
+  CRITICAL RULE: Every answer MUST include the Source and Section/Article at the end, formatted clearly like this:
+  Source:
+  [Name of Document]
+  [Article or Section Number]
+  
+  If the information is general and not from a specific law, state the general source of the principle.
+  ${context}`;
+
   // 1. Try NVIDIA (Advanced Reasoning)
   try {
     const nvidiaMessages = [
-      { role: "system", content: `You are SautiSahihi, a dignified and truthful civic assistant for Kenya. Respond in ${language}. Use clear, senior-friendly language. Provide factual information about laws, voting, and rights.` },
+      { role: "system", content: systemPrompt },
       ...history.map(h => ({ role: h.role === 'model' ? 'assistant' : h.role, content: h.parts[0].text })),
       { role: "user", content: message }
     ];
@@ -204,7 +234,11 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: [...history, { role: 'user', parts: [{ text: message }] }],
+      contents: [
+        { role: 'user', parts: [{ text: systemPrompt }] }, // Inject system prompt as first user part if needed, or use specific system instruction if API supports it. For now adding to the flow.
+        ...history, 
+        { role: 'user', parts: [{ text: message }] }
+      ],
       config: { tools: [{ googleSearch: {} }] }
     });
     const links: GroundingLink[] = [];

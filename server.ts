@@ -205,6 +205,24 @@ async function startServer() {
     }
   });
 
+  // --- Civic Knowledge Search Endpoint ---
+  app.get("/api/civic", async (req, res) => {
+    const { q } = req.query;
+    if (typeof q !== "string") {
+      return res.json({ results: [] });
+    }
+    
+    try {
+      // Lazy load logic
+      const { searchCivicKnowledge } = await import("./lib/searchKnowledge.ts");
+      const results = searchCivicKnowledge(q);
+      res.json({ results });
+    } catch (error) {
+      console.error("Civic Search Error:", error);
+      res.status(500).json({ error: "Failed to search civic knowledge" });
+    }
+  });
+
   // --- Vite Middleware for Development ---
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
