@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
 
@@ -119,16 +120,31 @@ async function startServer() {
     }
 
     try {
-      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      const response = await fetch("https://ai.api.nvidia.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+          "Authorization": `Bearer ${apiKey}`,
+          "Accept": "application/json"
         },
         body: JSON.stringify(req.body)
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type");
+      let result;
+
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        const raw = await response.text();
+        console.error("NVIDIA Chat Response NOT JSON. Status:", response.status, "Body:", raw.substring(0, 500));
+        return res.status(response.status).json({ 
+          error: `NVIDIA Chat returned ${contentType || 'non-JSON'}`, 
+          status: response.status,
+          preview: raw.substring(0, 500) 
+        });
+      }
+
       res.status(response.status).json(result);
     } catch (error) {
       console.error("NVIDIA Chat Proxy Error:", error);
@@ -145,7 +161,8 @@ async function startServer() {
     const { url, payload } = req.body;
     
     try {
-      const response = await fetch(url || "https://ai.api.nvidia.com/v1/stabilityai/stable-diffusion-xl", {
+      const targetUrl = url || "https://ai.api.nvidia.com/v1/genai/stabilityai/sdxl";
+      const response = await fetch(targetUrl, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
@@ -155,14 +172,36 @@ async function startServer() {
         body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type");
+      let result;
+      
+      if (contentType && contentType.includes("application/json")) {
+        const text = await response.text();
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          console.error("NVIDIA Image Response marked as JSON but failed to parse. Status:", response.status, "Text:", text.substring(0, 500));
+          res.status(500).json({ error: "Invalid JSON response from NVIDIA", status: response.status, raw: text.substring(0, 500) });
+          return;
+        }
+      } else {
+        const raw = await response.text();
+        console.error("NVIDIA Image Response NOT JSON. Status:", response.status, "Content-Type:", contentType, "Body:", raw.substring(0, 500));
+        res.status(500).json({ 
+          error: `NVIDIA Image API returned ${contentType || 'unknown content type'}`, 
+          status: response.status,
+          preview: raw.substring(0, 500) 
+        });
+        return;
+      }
+
       if (!response.ok) {
         console.error("NVIDIA API Error Response:", JSON.stringify(result));
       }
       res.status(response.status).json(result);
     } catch (error) {
-      console.error("NVIDIA Image Proxy Error:", error);
-      res.status(500).json({ error: "Failed to connect to NVIDIA Image API" });
+      console.error("NVIDIA Image Proxy Error:", error.message);
+      res.status(500).json({ error: error.message || "Failed to connect to NVIDIA Image API" });
     }
   });
 
@@ -174,7 +213,11 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static("dist"));
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {

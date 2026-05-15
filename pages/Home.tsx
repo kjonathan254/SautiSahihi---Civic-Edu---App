@@ -45,10 +45,10 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   
   // Hero Image Generation State
   const [heroImages, setHeroImages] = useState<Record<string, string>>({
-    'queue': '/assets/ThePowerOfPatience.png',
-    'ink': '/assets/TheSealOfDuty.png',
-    'papers': '/assets/YourChoiceYourVoice.png',
-    'winner': '/assets/PeacefulProgress.png'
+    'queue': '/images/voter-queue.webp',
+    'ink': '/images/seal-of-duty.webp',
+    'papers': '/images/your-choice-your-voice.webp',
+    'winner': '/images/peaceful-progress.webp'
   });
   const [isGeneratingHero, setIsGeneratingHero] = useState(false);
   
@@ -86,26 +86,8 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   }, [lang]);
 
   useEffect(() => {
-    const fetchHeroImage = async () => {
-      // Only generate if we don't have an AI image already (AI images are base64)
-      if (heroImages[activeMood] && heroImages[activeMood].startsWith('data:')) return;
-      
-      const moodObj = ELECTION_MOODS.find(m => m.id === activeMood);
-      if (!moodObj) return;
-      
-      setIsGeneratingHero(true);
-      try {
-        const img = await generateTopicImage(moodObj.prompt, moodObj.id, undefined, (moodObj as any).image);
-        if (img && img !== (moodObj as any).image) {
-          setHeroImages(prev => ({ ...prev, [activeMood]: img }));
-        }
-      } catch (err) {
-        console.error("Failed to generate hero image", err);
-      } finally {
-        setIsGeneratingHero(false);
-      }
-    };
-    fetchHeroImage();
+    // Note: We no longer generate hero images via AI as per user request.
+    // Static assets in heroImages initial state are used.
   }, [activeMood]);
 
   const handleMoodChange = (moodId: string) => {

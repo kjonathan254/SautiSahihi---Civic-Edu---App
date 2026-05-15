@@ -56,24 +56,18 @@ const LearnCard: React.FC<{
     return () => clearTimeout(timer);
   }, [topic.id, lang, idx]);
 
-  // Fix 2: NVIDIA Image Generation with Placeholder & Fade-in
+  // Note: We no longer generate topic images via AI as per user request.
+  // topic.image static paths are used directly.
   useEffect(() => {
-    const fetchImage = async () => {
-      setImageLoading(true);
-      try {
-        const aiImage = await generateTopicImage(topic.prompt, topic.id, topic.detailedContent);
-        if (aiImage) setImage(aiImage);
-      } catch (e) {
-        setImageError(true);
-      } finally {
-        setImageLoading(false);
-      }
-    };
-    fetchImage();
-  }, [topic.id, topic.prompt]);
+    setImageLoading(false);
+  }, [topic.id]);
 
   // Fix 3: Audio Pre-generation with IntersectionObserver
   useEffect(() => {
+    // Clear audio ref when language changes to force re-generation
+    audioBlobRef.current = null;
+    setAudioLoading(false);
+
     const observer = new IntersectionObserver(
       async ([entry]) => {
         if (entry.isIntersecting && !audioBlobRef.current && !audioLoading && content) {
@@ -123,8 +117,6 @@ const LearnCard: React.FC<{
     }
   };
 
-  const isAiImage = image?.startsWith('data:image');
-
   return (
     <div 
       ref={cardRef}
@@ -154,7 +146,6 @@ const LearnCard: React.FC<{
 
         <div className="absolute top-6 left-6 flex flex-col gap-3">
           <div className="bg-[#135bec] text-white px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl border-2 border-white/20">{topic.category}</div>
-          {isAiImage && <div className="bg-emerald-500/90 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 w-fit border-2 border-white/20"><span className="material-symbols-outlined text-xs filled">verified</span>AI GENERATED</div>}
         </div>
 
         {/* Instant Play Button */}
@@ -174,10 +165,11 @@ const LearnCard: React.FC<{
         <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
         
         {loading ? (
-          <div className="space-y-3 animate-pulse">
-            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-full"></div>
-            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-5/6"></div>
-            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-4/6"></div>
+          <div className="space-y-4 animate-pulse py-2">
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-full"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-11/12 shadow-sm"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-4/5 shadow-sm"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-3/4 shadow-sm"></div>
           </div>
         ) : (
           <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
@@ -188,8 +180,9 @@ const LearnCard: React.FC<{
         <button 
           onClick={() => onSelect({ ...topic, detailedContent: content?.detailed || topic.detailedContent })} 
           className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 border-2 border-[#135bec]/10 active:scale-[0.98] transition-all"
+          disabled={loading}
         >
-          Read Story
+          {loading ? 'Initializing...' : 'Read Story'}
         </button>
       </div>
     </div>

@@ -3,7 +3,7 @@
  * Integrated via server-side proxy to ensure API Key security.
  */
 
-export async function nvidiaChat(messages: { role: string; content: string }[], model: string = "meta/llama-4-maverick-17b-128e-instruct"): Promise<string> {
+export async function nvidiaChat(messages: { role: string; content: string }[], model: string = "meta/llama-3.1-8b-instruct"): Promise<string> {
   try {
     const response = await fetch("/api/nvidia/chat", {
       method: "POST",
@@ -34,7 +34,7 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        url: "https://ai.api.nvidia.com/v1/stabilityai/stable-diffusion-xl",
+        url: "https://ai.api.nvidia.com/v1/genai/stabilityai/sdxl",
         payload: {
           text_prompts: [{ text: enhancedPrompt, weight: 1 }],
           cfg_scale: 7,
@@ -46,7 +46,19 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
       })
     });
 
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("NVIDIA Proxy returned non-JSON response. Content-Type:", contentType, "Body:", text.substring(0, 500));
+      throw new Error(`Server returned non-JSON response (${response.status}). Check if the API route is configured correctly.`);
+    }
+
     const data = await response.json();
+    
+    if (data.error) {
+      console.error("NVIDIA API Error through Proxy:", data.error);
+      throw new Error(data.error);
+    }
     
     // NVIDIA NIM usually returns base64 in artifacts[0].base64
     if (data.artifacts && data.artifacts[0].base64) {
@@ -62,6 +74,7 @@ export async function nvidiaGenerateImage(prompt: string): Promise<string> {
     }
     
     console.error("NVIDIA Response Data (Missing Artifacts):", JSON.stringify(data));
+    console.log("Available keys in NVIDIA response:", Object.keys(data).join(", "));
     throw new Error("No image data returned from NVIDIA");
   } catch (error) {
     console.error("NVIDIA Image Generation Error:", error);

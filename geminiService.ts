@@ -15,59 +15,11 @@ export const getAudioCtx = () => {
 
 /**
  * SMART CONTEXT-AWARE IMAGE ORCHESTRATOR
- * Sequence: Cache -> Gemini -> Static Fallback
+ * Sequence: Static Fallback Only
  */
 export async function generateTopicImage(prompt: string, topicId: string, context?: string, fallbackUrl?: string): Promise<string> {
-  const cacheKey = `img_v6_${topicId}`;
-  
-  // 1. Check Cache
-  const cached = await getFromCache(cacheKey);
-  if (cached) return cached;
-
-  // 2. Refine Prompt (Optimized for NVIDIA/Kenyan Context)
-  let refinedPrompt = prompt;
-  try {
-    const aiRefiner = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
-    const refinement = await aiRefiner.models.generateContent({
-      model: 'gemini-flash-lite-latest',
-      contents: [{ role: 'user', parts: [{ text: `Create a 1-sentence cinematic photo prompt for: "${prompt}". Focus on: Kenyan citizens, realistic lighting, Nairobi atmosphere, high dignity. Context: ${context || 'Kenyan civic life'}. Style: Photorealistic 8k, cinematic lighting.` }] }]
-    });
-    if (refinement.text) refinedPrompt = refinement.text;
-  } catch (e) {
-    refinedPrompt = `${prompt}, photorealistic, Kenyan context, high quality, 8k`;
-  }
-
-  // 3. Try NVIDIA Generation (High Fidelity)
-  try {
-    const nvidiaImg = await nvidiaGenerateImage(refinedPrompt);
-    if (nvidiaImg) {
-      await saveToCache(cacheKey, nvidiaImg);
-      return nvidiaImg;
-    }
-  } catch (e) {
-    console.warn("NVIDIA Image generation failed, falling back to static asset/Gemini.");
-  }
-
-  // 4. Try Gemini Image Generation
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash', 
-      contents: [{ role: 'user', parts: [{ text: refinedPrompt }] }],
-      config: { imageConfig: { aspectRatio: "16:9" } }
-    });
-    const imgPart = response.candidates?.[0]?.content?.parts.find(p => (p as any).inlineData);
-    if (imgPart && (imgPart as any).inlineData) {
-      const b64 = `data:image/png;base64,${(imgPart as any).inlineData.data}`;
-      await saveToCache(cacheKey, b64);
-      return b64;
-    }
-  } catch (e) {
-    console.warn("Gemini Image generation failed.");
-  }
-  
-  // 5. Final Fallback (Prioritize provided /assets/ path)
-  return fallbackUrl || `https://picsum.photos/seed/${topicId}/800/450`;
+  // Use provided /images/ path if available, otherwise a stable placeholder
+  return fallbackUrl || `/images/${topicId}.webp` || `https://picsum.photos/seed/${topicId}/800/450`;
 }
 
 export async function fastAIResponse(prompt: string): Promise<string> {
