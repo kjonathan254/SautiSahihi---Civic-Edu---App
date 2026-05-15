@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AppLanguage, TranslationSet, LearnTopic } from '../types.ts';
 import { LEARN_TOPICS } from '../constants.tsx';
-import { generateTopicImage, fetchTTSBuffer, getAudioCtx, getLearnTopicContent, fetchTTSBase64, bufferFromBase64 } from '../geminiService.ts';
-import { hapticTap, hapticSuccess, hapticWarning } from '../utils.ts';
+import { getLearnTopicContent } from '../geminiService.ts';
+import { hapticTap } from '../utils.ts';
+import { useAudioPreloader } from '../useAudioPreloader.ts';
 
 interface Props {
   lang: AppLanguage;
@@ -23,8 +24,9 @@ const LearnCard: React.FC<{
   const [imageError, setImageError] = useState(false);
   
   const cardRef = useRef<HTMLDivElement>(null);
-  const audioBlobRef = useRef<AudioBuffer | null>(null);
-  const [audioLoading, setAudioLoading] = useState(false);
+  
+  const textToSpeak = content ? `${content.summary}. ${content.detailed}` : null;
+  const { play, isReady, isPreloading, isPlaying } = useAudioPreloader(textToSpeak, lang);
 
   // Fix 1: Staggered Loading & LocalStorage Caching (7-day TTL)
   useEffect(() => {
@@ -62,59 +64,10 @@ const LearnCard: React.FC<{
     setImageLoading(false);
   }, [topic.id]);
 
-  // Fix 3: Audio Pre-generation with IntersectionObserver
-  useEffect(() => {
-    // Clear audio ref when language changes to force re-generation
-    audioBlobRef.current = null;
-    setAudioLoading(false);
-
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (entry.isIntersecting && !audioBlobRef.current && !audioLoading && content) {
-          const sessionKey = `sauti_audio_${topic.id}_${lang}`;
-          const cachedAudio = sessionStorage.getItem(sessionKey);
-          
-          if (cachedAudio) {
-            const buffer = await bufferFromBase64(cachedAudio);
-            if (buffer) {
-              audioBlobRef.current = buffer;
-              return;
-            }
-          }
-
-          setAudioLoading(true);
-          try {
-            const textToSpeak = `${content.summary}. ${content.detailed}`;
-            const b64 = await fetchTTSBase64(textToSpeak, lang);
-            if (b64) {
-              sessionStorage.setItem(sessionKey, b64);
-              const buffer = await bufferFromBase64(b64);
-              if (buffer) audioBlobRef.current = buffer;
-            }
-          } finally {
-            setAudioLoading(false);
-          }
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
-  }, [content, lang, topic.id]);
-
-  const handlePlay = async (e: React.MouseEvent) => {
+  const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     hapticTap();
-    if (audioBlobRef.current) {
-      const ctx = getAudioCtx();
-      const source = ctx.createBufferSource();
-      source.buffer = audioBlobRef.current;
-      source.connect(ctx.destination);
-      source.start(0);
-    } else {
-       // Still generating, handled by UI spinner on button
-    }
+    play();
   };
 
   return (
@@ -150,13 +103,16 @@ const LearnCard: React.FC<{
 
         {/* Instant Play Button */}
         <button 
-          onClick={handlePlay}
-          className="absolute bottom-6 right-6 size-16 rounded-full bg-white/95 backdrop-blur-md shadow-2xl flex items-center justify-center text-[#135bec] active:scale-95 transition-transform"
+          onClick={handlePlayClick}
+          disabled={isPreloading && !isReady}
+          className={`absolute bottom-6 right-6 size-16 rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 ${isReady ? 'bg-white/95 text-[#135bec]' : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'}`}
         >
-          {audioLoading ? (
+          {isPreloading && !isReady ? (
             <span className="material-symbols-outlined animate-spin text-3xl">sync</span>
+          ) : isPlaying ? (
+            <span className="material-symbols-outlined text-4xl">stop</span>
           ) : (
-            <span className="material-symbols-outlined text-4xl">{audioBlobRef.current ? 'play_arrow' : 'hourglass_empty'}</span>
+            <span className="material-symbols-outlined text-4xl">{isReady ? 'play_arrow' : 'hourglass_empty'}</span>
           )}
         </button>
       </div>
