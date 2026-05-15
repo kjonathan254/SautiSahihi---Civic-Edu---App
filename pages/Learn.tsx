@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AppLanguage, TranslationSet, LearnTopic } from '../types.ts';
 import { LEARN_TOPICS } from '../constants.tsx';
-import { getLearnTopicContent } from '../geminiService.ts';
+import { getLearnTopicContent, speakText } from '../geminiService.ts';
 import { hapticTap } from '../utils.ts';
 import { useAudioPreloader } from '../useAudioPreloader.ts';
 
@@ -112,7 +112,7 @@ const LearnCard: React.FC<{
           ) : isPlaying ? (
             <span className="material-symbols-outlined text-4xl">stop</span>
           ) : (
-            <span className="material-symbols-outlined text-4xl">{isReady ? 'play_arrow' : 'hourglass_empty'}</span>
+            <span className="material-symbols-outlined text-4xl">{isReady ? 'play_arrow' : 'volume_up'}</span>
           )}
         </button>
       </div>
@@ -161,11 +161,21 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
   const handleBack = () => setSelectedTopic(null);
 
   if (selectedTopic) {
+    const textToSpeak = `${selectedTopic.title}. ${selectedTopic.detailedContent}`;
     return (
       <div className="space-y-6 animate-in fade-in duration-300 pb-24">
-        <button onClick={handleBack} className="flex items-center gap-3 text-[#135bec] font-black text-2xl p-2 active:bg-blue-50 rounded-xl transition-all">
-          <span className="material-symbols-outlined text-3xl">arrow_back</span> Back
-        </button>
+        <div className="flex items-center justify-between">
+          <button onClick={handleBack} className="flex items-center gap-3 text-[#135bec] font-black text-2xl p-2 active:bg-blue-50 rounded-xl transition-all">
+            <span className="material-symbols-outlined text-3xl">arrow_back</span> Back
+          </button>
+          <button 
+            onClick={() => { hapticTap(); speakText(textToSpeak, lang); }}
+            className="flex items-center gap-2 bg-[#135bec] text-white px-6 py-3 rounded-2xl font-black text-sm uppercase shadow-lg active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-xl">volume_up</span>
+            Listen to Article
+          </button>
+        </div>
 
         <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-2xl space-y-6">
           <h2 className="text-4xl font-black text-center dark:text-white">{selectedTopic.title}</h2>

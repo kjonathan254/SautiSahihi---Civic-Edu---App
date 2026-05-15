@@ -18,10 +18,14 @@ export async function nvidiaChat(messages: { role: string; content: string }[], 
     });
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || "I am currently processing that request.";
+    const content = data.choices?.[0]?.message?.content;
+    if (!content || content.includes("error") || content.includes("not found")) {
+      return null;
+    }
+    return content;
   } catch (error) {
     console.error("NVIDIA Chat Error:", error);
-    throw error;
+    return null;
   }
 }
 

@@ -25,18 +25,26 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
 
 export async function fastAIResponse(prompt: string, language: AppLanguage = 'ENG'): Promise<string> {
   const localResults = searchCivicKnowledge(prompt);
+  
+  // High confidence local match (Title or Exact Keyword match usually gives score >= 10)
+  if (localResults.length > 0 && localResults[0].score >= 10) {
+    const r = localResults[0];
+    return `${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`;
+  }
+
   const context = localResults.length > 0
-    ? `\n\nLegal Context:\n${localResults.slice(0, 1).map(r => `Source: ${r.source}\nSection: ${r.section}\nContent Snippet: ${r.content.substring(0, 200)}`).join('\n')}`
+    ? `\n\nLegal Knowledge Context:\n${localResults.slice(0, 2).map(r => `Source: ${r.source}\nSection: ${r.section}\nContent: ${r.content}`).join('\n\n')}`
     : "";
 
   const enhancedPrompt = `User Question: ${prompt}\n\nRespond briefly in ${language}. 
   CRITICAL RULE: Always cite the specific legal source (e.g. Constitution of Kenya 2010) and Article/Section if applicable.
+  Use the following context if relevant:
   ${context}`;
 
   // 1. Try NVIDIA First (High Speed)
   try {
     const text = await nvidiaChat([{ role: 'user', content: enhancedPrompt }], "meta/llama-3.1-8b-instruct");
-    if (text) return text;
+    if (text && text.length > 10) return text;
   } catch (e) {
     console.warn("NVIDIA fast response failed, falling back to Gemini.");
   }
@@ -45,10 +53,10 @@ export async function fastAIResponse(prompt: string, language: AppLanguage = 'EN
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-lite-latest',
+      model: 'gemini-2.0-flash',
       contents: [{ role: 'user', parts: [{ text: enhancedPrompt }] }]
     });
-    return response.text || "No response.";
+    return response.text || "I am unable to provide a verified answer at this time. Please check your registration status at an IEBC office.";
   } catch (e) {
     return "I am having trouble connecting to my reasoning engines. Please try again.";
   }
@@ -210,6 +218,14 @@ export async function getLearnTopicContent(topic: string, description: string, l
 export async function chatAssistant(message: string, language: AppLanguage, history: any[] = []): Promise<{text: string, links: GroundingLink[]}> {
   // 0. Search local knowledge base
   const localResults = searchCivicKnowledge(message);
+
+  // If we have a very strong local match (multiple keyword matches or title match), return it directly
+  if (localResults.length > 0 && localResults[0].score >= 15 && history.length === 0) {
+    const r = localResults[0];
+    const text = `${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`;
+    return { text, links: [] };
+  }
+
   const context = localResults.length > 0 
     ? `\n\nRelevant Legal Information to guide your answer:\n${localResults.slice(0, 2).map(r => `Source: ${r.source}\nSection: ${r.section}\nContent: ${r.content}`).join('\n\n')}`
     : "";
