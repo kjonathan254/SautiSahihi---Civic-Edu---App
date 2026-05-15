@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 // Pages
 import Home from './pages/Home.tsx';
 import FactChecker from './pages/FactChecker.tsx';
-import Poll from './pages/Poll.tsx';
 import Learn from './pages/Learn.tsx';
 import Assistant from './pages/Assistant.tsx';
 import Settings from './pages/Settings.tsx';
@@ -123,7 +122,6 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'home': return <Home lang={lang} t={t} onNavigate={navigateTo} />;
       case 'fact-checker': return <FactChecker lang={lang} t={t} />;
-      case 'poll': return <Poll lang={lang} t={t} />;
       case 'learn': return <Learn lang={lang} t={t} />;
       case 'assistant': return <Assistant lang={lang} t={t} />;
       case 'office-locator': return <OfficeLocator lang={lang} t={t} />;

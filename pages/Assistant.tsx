@@ -19,7 +19,7 @@ interface Message {
 /**
  * SeniorFriendlyText - Parses markdown-like strings into clean, senior-friendly layouts.
  */
-const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
+export const SeniorFriendlyText: React.FC<{ text: string }> = ({ text }) => {
   const processEmphasis = (line: string) => {
     const parts = line.split(/\*\*(.*?)\*\*/g);
     return parts.map((part, i) => {
@@ -294,86 +294,46 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
       </div>
 
       <div className="space-y-4 pb-4">
-        {!showKeyboard && isSupported && (
-          <div className="flex flex-col items-center gap-4">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-blue-50 flex items-center gap-2 mb-6">
+          {isSupported && (
             <button 
-              onClick={startListening} 
-              className={`size-32 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-90 border-b-8 ${
-                isListening ? 'bg-rose-600 border-rose-900 text-white animate-pulse' : 'bg-[#135bec] border-blue-900 text-white'
-              }`}
+              onClick={startListening}
+              className={`size-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
             >
-              <span className="material-symbols-outlined text-6xl">{isListening ? 'graphic_eq' : 'mic'}</span>
+              <span className="material-symbols-outlined text-3xl">{isListening ? 'graphic_eq' : 'mic'}</span>
             </button>
-            <p className="text-xl font-black text-slate-400 uppercase tracking-widest">
-              {isListening ? 'I am listening...' : 'Tap to speak'}
-            </p>
-            
-            <button 
-              onClick={() => { hapticTap(); setShowKeyboard(true); }}
-              className="text-sm font-black text-[#135bec] underline underline-offset-8 flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined">keyboard</span>
-              Type instead
-            </button>
-          </div>
-        )}
-
-        {!showKeyboard && !isSupported && (
-          <div className="flex flex-col items-center gap-4">
-            <button 
-              onClick={() => { hapticTap(); setShowKeyboard(true); }}
-              className="w-full bg-[#135bec] text-white py-6 rounded-[2.5rem] font-black text-2xl shadow-xl border-b-8 border-blue-900 active:scale-95 transition-all"
-            >
-              {t.assistant || "OPEN CHAT"}
-            </button>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
-              Speech not supported on this device
-            </p>
-          </div>
-        )}
-
-        {showKeyboard && (
-          <div className="p-4 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-blue-50 flex items-center gap-2 animate-in slide-in-from-bottom-5">
-            {isSupported && (
-              <button 
-                onClick={startListening}
-                className={`size-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
-              >
-                <span className="material-symbols-outlined text-3xl">{isListening ? 'graphic_eq' : 'mic'}</span>
-              </button>
-            )}
-            <input 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your question here..."
-              className="flex-1 bg-transparent border-none outline-none p-4 text-2xl font-black dark:text-white"
-            />
-            <button 
-              onClick={() => handleSend()}
-              className="size-16 bg-[#135bec] text-white rounded-full flex items-center justify-center shadow-xl"
-            >
-              <span className="material-symbols-outlined text-3xl">send</span>
-            </button>
-            <button 
-              onClick={() => setShowKeyboard(false)}
-              className="size-16 text-slate-300 hover:text-rose-500 transition-colors"
-            >
-              <span className="material-symbols-outlined text-4xl">cancel</span>
-            </button>
-          </div>
-        )}
+          )}
+          <input 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Ask your question here..."
+            className="flex-1 bg-transparent border-none outline-none p-4 text-2xl font-black dark:text-white"
+          />
+          <button 
+            onClick={() => handleSend()}
+            disabled={!input.trim()}
+            className="size-16 bg-[#135bec] text-white rounded-full flex items-center justify-center shadow-xl disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-3xl">send</span>
+          </button>
+        </div>
 
         {!loading && messages.length === 1 && (
-          <div className="grid grid-cols-1 gap-3 pt-4">
-            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] text-center mb-2">Try asking these:</p>
+          <div className="grid grid-cols-1 gap-3 pt-4 overflow-y-auto max-h-60 scrollbar-hide">
+            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] text-center mb-2">Popular Questions:</p>
             {faqs.map((faq, idx) => (
               <button 
                 key={idx} 
                 onClick={() => handleFaqClick(faq)} 
-                className="w-full p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 rounded-[2rem] text-left shadow-sm flex items-center justify-between group active:bg-blue-50"
+                className="w-full p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 rounded-[2rem] text-left shadow-sm flex items-center justify-between group active:bg-blue-50 transition-all hover:border-blue-200"
               >
-                <span className="text-xl font-black text-slate-700 dark:text-white">{faq.question}</span>
+                <div className="flex items-center gap-4">
+                  <div className="size-10 bg-blue-50 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-black text-xs">{idx + 1}</span>
+                  </div>
+                  <span className="text-xl font-black text-slate-700 dark:text-white">{faq.question}</span>
+                </div>
                 <span className="material-symbols-outlined text-[#135bec] group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
               </button>
             ))}

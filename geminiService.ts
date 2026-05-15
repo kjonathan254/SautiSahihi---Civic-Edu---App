@@ -23,8 +23,15 @@ export async function generateTopicImage(prompt: string, topicId: string, contex
   return fallbackUrl || `/images/${topicId}.webp` || `https://picsum.photos/seed/${topicId}/800/450`;
 }
 
-export async function fastAIResponse(prompt: string): Promise<string> {
-  const enhancedPrompt = `${prompt}\n\nCRITICAL RULE: Always cite the specific legal source (e.g. Constitution of Kenya 2010) and Article/Section if applicable. If you are not sure, state that you are providing general information.`;
+export async function fastAIResponse(prompt: string, language: AppLanguage = 'ENG'): Promise<string> {
+  const localResults = searchCivicKnowledge(prompt);
+  const context = localResults.length > 0
+    ? `\n\nLegal Context:\n${localResults.slice(0, 1).map(r => `Source: ${r.source}\nSection: ${r.section}\nContent Snippet: ${r.content.substring(0, 200)}`).join('\n')}`
+    : "";
+
+  const enhancedPrompt = `User Question: ${prompt}\n\nRespond briefly in ${language}. 
+  CRITICAL RULE: Always cite the specific legal source (e.g. Constitution of Kenya 2010) and Article/Section if applicable.
+  ${context}`;
 
   // 1. Try NVIDIA First (High Speed)
   try {

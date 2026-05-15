@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppLanguage, TranslationSet } from '../types.ts';
-import { getLiveNewsSummary, speakText, generateTopicImage, fastAIResponse } from '../geminiService.ts';
+import { getLiveNewsSummary, speakText, fastAIResponse } from '../geminiService.ts';
 import { hapticTap, hapticSuccess } from '../utils.ts';
 import { ELECTION_MOODS, IEBC_HQ_INFO, VOTERS_CHARTER } from '../constants.tsx';
+import { SeniorFriendlyText } from './Assistant.tsx';
 
 /**
  * SautiLogo - The "Mic-Bubble" brand asset
@@ -63,7 +64,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
     setIsQuickLoading(true);
     setQuickResponse('');
     try {
-      const res = await fastAIResponse(quickInput);
+      const res = await fastAIResponse(quickInput, lang);
       setQuickResponse(res);
       hapticSuccess();
     } catch (e) {
@@ -203,8 +204,23 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
           </button>
         </div>
         {quickResponse && (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-l-4 border-[#135bec] animate-in slide-in-from-top-2">
-            <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{quickResponse}</p>
+          <div className="p-8 bg-blue-50/30 dark:bg-blue-900/10 rounded-[3rem] border-2 border-blue-100 dark:border-blue-900/30 animate-in slide-in-from-top-4 duration-500 shadow-inner">
+             <div className="flex items-center gap-2 mb-4">
+                <div className="size-8 bg-[#135bec] rounded-full flex items-center justify-center">
+                   <span className="material-symbols-outlined text-white text-xs filled">check_circle</span>
+                </div>
+                <span className="text-xs font-black uppercase tracking-widest text-[#135bec]">Verified Civic Info</span>
+             </div>
+             <SeniorFriendlyText text={quickResponse} />
+             <div className="mt-6 pt-4 border-t border-blue-100 flex justify-end">
+                <button 
+                  onClick={() => { hapticTap(); speakText(quickResponse.replace(/\*\*/g, ''), lang); }}
+                  className="flex items-center gap-2 text-[#135bec] font-black text-xs uppercase hover:opacity-70"
+                >
+                   <span className="material-symbols-outlined text-sm">volume_up</span>
+                   Listen
+                </button>
+             </div>
           </div>
         )}
       </section>
@@ -276,10 +292,13 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
           <div className="space-y-1"><h4 className="font-black text-4xl tracking-tighter">{t.factChecker}</h4><p className="font-bold opacity-90 text-xl italic leading-tight">Identify truth from rumors instantly.</p></div>
         </button>
         
-        <div className="grid grid-cols-2 gap-6">
-          <button onClick={() => { hapticTap(); onNavigate('poll'); }} className="p-8 bg-[#135bec] text-white rounded-[4rem] shadow-2xl flex flex-col gap-4 active:scale-95 transition-all text-left"><span className="material-symbols-outlined text-6xl filled">ballot</span><h4 className="font-black text-3xl tracking-tighter">{t.poll}</h4><p className="text-sm font-bold opacity-70">Practice Voting</p></button>
-          <button onClick={() => { hapticTap(); onNavigate('learn'); }} className="p-8 bg-emerald-600 text-white rounded-[4rem] shadow-2xl flex flex-col gap-4 active:scale-95 transition-all text-left"><span className="material-symbols-outlined text-6xl filled">school</span><h4 className="font-black text-3xl tracking-tighter">{t.learn}</h4><p className="text-sm font-bold opacity-70">Civic Academy</p></button>
-        </div>
+        <button onClick={() => { hapticTap(); onNavigate('learn'); }} className="p-12 bg-emerald-600 text-white rounded-[4rem] shadow-2xl flex flex-col gap-6 active:scale-95 transition-all text-left">
+          <span className="material-symbols-outlined text-7xl filled">school</span>
+          <div>
+            <h4 className="font-black text-4xl tracking-tighter">{t.learn}</h4>
+            <p className="font-bold opacity-80 text-xl">Civic Academy</p>
+          </div>
+        </button>
       </div>
 
       <section className="bg-white dark:bg-slate-900 p-10 rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6">
