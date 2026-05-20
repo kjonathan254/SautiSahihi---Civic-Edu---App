@@ -52,15 +52,24 @@ const LearnCard: React.FC<{
   // Fix 1: Staggered Loading & LocalStorage Caching (7-day TTL)
   useEffect(() => {
     const cacheKey = `sauti_learn_${topic.id}_${lang}`;
-    const cached = localStorage.getItem(cacheKey);
+    let cached: string | null = null;
+    try {
+      cached = localStorage.getItem(cacheKey);
+    } catch (storageErr) {
+      console.warn("localStorage.getItem failed inside Learn.tsx:", storageErr);
+    }
     
     if (cached) {
-      const { data, timestamp } = JSON.parse(cached);
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      if (Date.now() - timestamp < sevenDays) {
-        setContent(data);
-        setLoading(false);
-        return;
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        if (Date.now() - timestamp < sevenDays) {
+          setContent(data);
+          setLoading(false);
+          return;
+        }
+      } catch (jsonErr) {
+        console.warn("Failed to parse cached learn topic:", jsonErr);
       }
     }
 
@@ -68,7 +77,11 @@ const LearnCard: React.FC<{
       try {
         const enriched = await getLearnTopicContent(topic.title, topic.detailedContent, lang);
         setContent(enriched);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: enriched, timestamp: Date.now() }));
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data: enriched, timestamp: Date.now() }));
+        } catch (setErr) {
+          console.warn("localStorage.setItem failed inside Learn.tsx:", setErr);
+        }
       } catch (e) {
         setContent({ summary: topic.summary, detailed: topic.detailedContent });
       } finally {

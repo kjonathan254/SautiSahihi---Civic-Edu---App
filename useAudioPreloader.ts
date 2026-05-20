@@ -2,6 +2,44 @@ import { useRef, useState, useEffect } from 'react';
 import { fetchTTSBase64, bufferFromBase64, getAudioCtx, fetchTTSBuffer } from './geminiService.ts';
 import { AppLanguage } from './types.ts';
 
+// Safe wrappers for sessionStorage to handle quota exceedance, security restrictions, or private-mode limits gracefully.
+function getCachedAudio(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch (e) {
+    console.warn("sessionStorage.getItem access failed:", e);
+    return null;
+  }
+}
+
+function cacheAudio(key: string, value: string): void {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch (e) {
+    console.warn("sessionStorage.setItem failed, cleaning old audio cache elements:", e);
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith('sauti_audio_')) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => {
+        try {
+          sessionStorage.removeItem(k);
+        } catch (err) {
+          // ignore
+        }
+      });
+      // Try set again after cleaning
+      sessionStorage.setItem(key, value);
+    } catch (innerError) {
+      console.warn("Failed to cache audio in storage even after cleaning up old entries:", innerError);
+    }
+  }
+}
+
 export function useAudioPreloader(text: string | null, language: AppLanguage) {
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const [isPreloading, setIsPreloading] = useState(false);
@@ -17,9 +55,9 @@ export function useAudioPreloader(text: string | null, language: AppLanguage) {
       return;
     }
 
-    // Check sessionStorage cache first
+    // Check sessionStorage cache first via safe getter
     const cacheKey = `sauti_audio_${btoa(unescape(encodeURIComponent(text.slice(0, 100))))}_${language}`;
-    const cached = sessionStorage.getItem(cacheKey);
+    const cached = getCachedAudio(cacheKey);
 
     if (cached) {
       // Already have it — decode from cache instantly
@@ -37,7 +75,7 @@ export function useAudioPreloader(text: string | null, language: AppLanguage) {
     setIsReady(false);
     fetchTTSBase64(text, language).then((b64) => {
       if (b64) {
-        sessionStorage.setItem(cacheKey, b64); // cache raw base64
+        cacheAudio(cacheKey, b64); // cache raw base64 safely
         bufferFromBase64(b64).then((buffer) => {
           if (buffer) {
             audioBufferRef.current = buffer;

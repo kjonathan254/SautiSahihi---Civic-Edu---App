@@ -303,6 +303,20 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
 
             <div className="flex items-center justify-center gap-6 mt-10 pt-6 border-t border-slate-50">
                <button 
+                  id="assistant-back-btn"
+                  onClick={() => {
+                    hapticTap();
+                    setMessages([
+                      { role: 'ai', text: `Jambo! I am your SautiSahihi Assistant.\n\n* I can help you understand laws.\n* I can help you find offices.\n* I can check the latest news.\n\nJust **tap the microphone** and ask me anything.` }
+                    ]);
+                  }}
+                  className="px-8 py-5 rounded-3xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-2 border-transparent hover:border-[#135bec]/25 font-black text-xl flex items-center gap-2 shadow-md transition-all active:scale-95"
+               >
+                 <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                 Back
+               </button>
+               <button 
+                  id="assistant-listen-btn"
                   onClick={() => handleRead(currentMsg.text)}
                   className={`size-20 rounded-3xl flex items-center justify-center transition-all ${isReading ? 'bg-emerald-500 text-white animate-pulse shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)]' : 'bg-slate-100 dark:bg-slate-900 text-[#135bec] border-2 border-transparent'}`}
                >

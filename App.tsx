@@ -42,21 +42,55 @@ const KENYAN_CONTEXT_IMAGES = [
 ];
 
 const App: React.FC = () => {
-  const [lang, setLang] = useState<AppLanguage>(() => (localStorage.getItem('lang') as AppLanguage) || 'ENG');
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+  const [lang, setLang] = useState<AppLanguage>(() => {
+    try {
+      return (localStorage.getItem('lang') as AppLanguage) || 'ENG';
+    } catch {
+      return 'ENG';
+    }
+  });
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem('darkMode') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [activeTab, setActiveTab] = useState('home');
   const [hasKey, setHasKey] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
-  const [largeText, setLargeText] = useState(() => localStorage.getItem('largeText') === 'true');
-  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('highContrast') === 'true');
+  const [isAdmin, setIsAdmin] = useState(() => {
+    try {
+      return localStorage.getItem('isAdmin') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [largeText, setLargeText] = useState(() => {
+    try {
+      return localStorage.getItem('largeText') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [highContrast, setHighContrast] = useState(() => {
+    try {
+      return localStorage.getItem('highContrast') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
-    localStorage.setItem('lang', lang);
-    localStorage.setItem('darkMode', darkMode.toString());
-    localStorage.setItem('isAdmin', isAdmin.toString());
-    localStorage.setItem('largeText', largeText.toString());
-    localStorage.setItem('highContrast', highContrast.toString());
+    try {
+      localStorage.setItem('lang', lang);
+      localStorage.setItem('darkMode', darkMode.toString());
+      localStorage.setItem('isAdmin', isAdmin.toString());
+      localStorage.setItem('largeText', largeText.toString());
+      localStorage.setItem('highContrast', highContrast.toString());
+    } catch (e) {
+      console.warn("localStorage.setItem failed in App.tsx:", e);
+    }
 
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
