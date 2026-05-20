@@ -249,14 +249,34 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
 
       <div className="flex-1 flex flex-col justify-center items-center py-4">
         {loading ? (
-          <div className="text-center space-y-6">
-            <div className="relative size-32 mx-auto">
-               <div className="absolute inset-0 bg-[#135bec]/20 rounded-full animate-ping" />
-               <div className="relative size-full bg-white dark:bg-slate-800 rounded-full flex items-center justify-center border-4 border-[#135bec] shadow-xl">
-                 <span className="material-symbols-outlined text-[#135bec] text-5xl animate-bounce">psychology</span>
-               </div>
+          <div className="w-full bg-white dark:bg-slate-800 rounded-[3.5rem] p-8 sm:p-12 shadow-2xl border-4 border-blue-50 dark:border-slate-700 animate-in zoom-in-95 duration-500 relative overflow-hidden">
+            {messages.length > 0 && messages[messages.length-1].role === 'user' && (
+              <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border-l-8 border-blue-300">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Your Question</p>
+                <p className="text-2xl font-bold text-slate-700 dark:text-slate-200 italic leading-tight">"{messages[messages.length-1].text}"</p>
+              </div>
+            )}
+
+            <div className="animate-pulse space-y-6">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-blue-500/10 text-blue-600 dark:text-blue-400 gap-1.5 animate-pulse border border-blue-500/20">
+                  <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                  THINKING...
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-full"></div>
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-[94%]"></div>
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-[80%]"></div>
+              </div>
+
+              <div className="flex items-center justify-center pt-6 mt-10 border-t border-slate-100 dark:border-slate-800">
+                <div className="size-20 bg-slate-100 dark:bg-slate-900 rounded-3xl flex items-center justify-center text-slate-400">
+                  <span className="material-symbols-outlined text-4xl animate-spin text-blue-600">sync</span>
+                </div>
+              </div>
             </div>
-            <p className="text-2xl font-black text-[#135bec] animate-pulse uppercase tracking-widest">Thinking...</p>
           </div>
         ) : (
           <div className="w-full bg-white dark:bg-slate-800 rounded-[3.5rem] p-8 sm:p-12 shadow-2xl border-4 border-blue-50 dark:border-slate-700 animate-in zoom-in-95 duration-500 relative overflow-hidden">

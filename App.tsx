@@ -118,6 +118,62 @@ const App: React.FC = () => {
 
   const t = TRANSLATIONS[lang];
 
+  const getHeaderTitle = () => {
+    switch (activeTab) {
+      case 'home':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <h1 className="text-2xl font-black text-[#135bec] truncate">SautiSahihi</h1>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 gap-1 animate-pulse shadow-sm border border-emerald-200/20 shrink-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              LIVE
+            </span>
+          </div>
+        );
+      case 'fact-checker':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="material-symbols-outlined text-emerald-600 filled font-normal text-3xl shrink-0">verified</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[120px] sm:max-w-none">{t.factChecker}</span>
+          </div>
+        );
+      case 'office-locator':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="material-symbols-outlined text-red-500 filled font-normal text-3xl shrink-0">location_on</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[120px] sm:max-w-none">{t.iebcLocator}</span>
+          </div>
+        );
+      case 'learn':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="material-symbols-outlined text-amber-500 filled font-normal text-3xl shrink-0">school</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[120px] sm:max-w-none">{t.learn}</span>
+          </div>
+        );
+      case 'assistant':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="material-symbols-outlined text-[#135bec] filled font-normal text-3xl shrink-0">psychology</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[120px] sm:max-w-none">{t.assistant}</span>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="material-symbols-outlined text-slate-500 filled font-normal text-3xl shrink-0">settings</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate max-w-[120px] sm:max-w-none">{t.settings}</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <h1 className="text-2xl font-black text-[#135bec] truncate">SautiSahihi</h1>
+          </div>
+        );
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'home': return <Home lang={lang} t={t} onNavigate={navigateTo} />;
@@ -163,9 +219,9 @@ const App: React.FC = () => {
     <div className={`flex flex-col h-screen font-sans ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`p-4 shadow-xl sticky top-0 z-50 ${darkMode ? 'bg-slate-900 border-b border-slate-800' : 'bg-white border-b border-gray-100'}`}>
         <div className="flex items-center justify-between max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigateTo('home')}>
+          <div className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 mr-2" onClick={() => navigateTo('home')}>
             <div className="size-11"><SautiLogo /></div>
-            <h1 className="text-2xl font-black text-[#135bec]">SautiSahihi</h1>
+            {getHeaderTitle()}
           </div>
           <button onClick={() => navigateTo('settings')} className="p-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 active:scale-90 transition-all">
             <span className="material-symbols-outlined text-3xl">settings</span>

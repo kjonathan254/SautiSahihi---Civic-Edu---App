@@ -15,6 +15,244 @@ export interface CivicChunk {
 
 export const civicKnowledge: CivicChunk[] = [
   // ============================================================
+  // SENIOR-FRIENDLY CIVIC & ELECTORAL Q&A
+  // ============================================================
+
+  {
+    id: "vr_001",
+    source: "Constitution of Kenya 2010, Article 38 & Article 83; Elections Act 2011, Section 3",
+    section: "Voter Registration - Eligibility",
+    title: "Who can register as a voter in Kenya?",
+    keywords: ["register", "voter", "eligible", "qualify", "age", "18", "citizen", "registration", "sajili", "kura", "eligibility voter", "qualify vote", "Am I eligible to vote?", "Who is allowed to vote?", "Can I register to vote?", "What are the requirements to register as a voter?", "Ninaweza kusajiliwa kupiga kura?"],
+    content: "Any Kenyan citizen who is 18 years of age or older has the right to register as a voter. You must be a citizen of Kenya by birth or registration. You cannot register if you have been declared of unsound mind by a court, or if you are serving a prison sentence of at least three years."
+  },
+
+  {
+    id: "vr_002",
+    source: "Elections Act 2011, Section 4 & 5; IEBC Act 2011",
+    section: "Voter Registration - Location",
+    title: "Where do I register as a voter?",
+    keywords: ["where", "register", "office", "centre", "IEBC", "location", "county", "wapi", "place", "Where can I register to vote?", "Which office do I go to register?", "How do I find a voter registration centre?", "Nasajiliwa wapi?"],
+    content: "You register at your nearest IEBC office or at designated voter registration centres during official registration periods. During mass registration exercises, IEBC sets up temporary centres at schools, churches, and community centres across all 47 counties. Visit iebc.or.ke or call the IEBC toll-free helpline 0800 724 242 to find your nearest centre."
+  },
+
+  {
+    id: "vr_003",
+    source: "Elections Act 2011, Section 5(1); Elections (General) Regulations 2012, Regulation 4",
+    section: "Voter Registration - Documents",
+    title: "What documents do I need to register as a voter?",
+    keywords: ["document", "ID", "national identity", "passport", "papers", "bring", "kitambulisho", "hati", "What ID do I need to vote?", "Do I need my national ID to vote?", "What papers do I bring to register?", "Ninahitaji nini kusajili?"],
+    content: "To register as a voter you need your original Kenyan National Identity Card (ID). If you do not have an ID, you can use a valid Kenyan passport. Your ID must be original — photocopies are not accepted. You do not need any other documents."
+  },
+
+  {
+    id: "vr_004",
+    source: "Elections Act 2011, Section 62; Elections (General) Regulations 2012",
+    section: "Voter Registration - Polling Station",
+    title: "Can I vote away from my registered polling station?",
+    keywords: ["away", "travel", "different place", "polling station", "county", "not home", "transfer", "What if I am not in my home county on election day?", "Can I vote in a different place?", "I am travelling on election day, can I still vote?"],
+    content: "No. You must vote at the specific polling station where you are registered. Your voter card shows your assigned polling station. If you are away on election day you will not be able to vote. Plan ahead and ensure you are at your registered station on election day."
+  },
+
+  {
+    id: "vt_001",
+    source: "Constitution of Kenya 2010, Article 81(e); Elections Act 2011, Section 67 & 68",
+    section: "Voting Rights - Polling Station Rights",
+    title: "What are my rights at the polling station?",
+    keywords: ["rights", "polling station", "secret", "dignity", "assistance", "disability", "intimidation", "haki", "How should I be treated when I go to vote?", "What rights do I have when voting?", "Nina haki gani kwenye kituo cha kupigia kura?"],
+    content: "At the polling station you have the right to: vote in secret — no one can see or force your choice; be treated with dignity and respect; get assistance if you have a disability or cannot read; ask for help from an IEBC official; cast your vote without being intimidated or threatened."
+  },
+
+  {
+    id: "vt_002",
+    source: "Elections Act 2011, Section 68; Elections (General) Regulations 2012, Regulation 60",
+    section: "Voting Rights - Assisted Voting",
+    title: "Can someone help me vote if I have a disability or cannot read?",
+    keywords: ["disability", "blind", "read", "assist", "help", "braille", "ulemavu", "msaada", "cannot", "I cannot read, can someone help me vote?", "I am blind, how do I vote?", "Who can assist me at the polling station?", "Nina ulemavu, ninaweza kupata msaada?"],
+    content: "Yes. If you have a physical disability, are blind, or cannot read, you are entitled to assistance. You may bring one person of your choice to assist you, or ask an IEBC official for help. The assistant must mark the ballot exactly as you instruct — they cannot influence your vote. IEBC also provides braille ballot papers."
+  },
+
+  {
+    id: "vt_003",
+    source: "Constitution of Kenya 2010, Article 38",
+    section: "Voting Rights - Requirement",
+    title: "Is voting in Kenya compulsory?",
+    keywords: ["compulsory", "forced", "must", "required", "penalty", "not vote", "lazima", "Am I forced to vote?", "What happens if I do not vote?", "Is it an offence not to vote?", "Lazima nipige kura?"],
+    content: "No. Voting in Kenya is not compulsory. It is your democratic right to vote, but you are not legally required to do so. There is no penalty for not voting. However, the Constitution recognises voting as a civic duty and encourages all eligible citizens to participate."
+  },
+
+  {
+    id: "vt_004",
+    source: "Elections Act 2011, Section 87; Public Holidays Act",
+    section: "Voting Rights - Employment Protection",
+    title: "Can my employer stop me from going to vote?",
+    keywords: ["employer", "boss", "work", "time off", "holiday", "prevent", "mwajiri", "job", "Does my boss have to give me time to vote?", "Am I allowed time off work to vote?", "What if my employer refuses to let me vote?"],
+    content: "No employer can legally prevent you from voting. Election day is a public holiday in Kenya — all employees are entitled to the day off. If your employer prevents you from voting or threatens you because of your vote, this is an election offence and should be reported to the IEBC or the police."
+  },
+
+  {
+    id: "ep_001",
+    source: "Constitution of Kenya 2010, Article 101(1) & Article 177(1)",
+    section: "Elections Process - Frequency",
+    title: "How often are general elections held in Kenya?",
+    keywords: ["often", "years", "next election", "when", "five years", "August", "2027", "uchaguzi", "mara ngapi", "When is the next election?", "How many years between elections?", "When do Kenyans vote?", "Uchaguzi hufanyika mara ngapi?"],
+    content: "General elections in Kenya are held every five years on the second Tuesday of August. The last general election was held on 9 August 2022. The next general election is due on 12 August 2027. By-elections may be held between general elections to fill vacant seats."
+  },
+
+  {
+    id: "ep_002",
+    source: "Constitution of Kenya 2010, Articles 97, 98, 101, 177, 180",
+    section: "Elections Process - Positions Elected",
+    title: "What positions do Kenyans vote for in a general election?",
+    keywords: ["vote for", "positions", "president", "senator", "governor", "MP", "MCA", "women rep", "six", "ballot", "chagua", "Who do I vote for?", "How many people do I elect?", "What offices are elected in Kenya?", "Ninachagua nani?"],
+    content: "In a general election you vote for six positions: (1) President and Deputy President, (2) Senator for your county, (3) Governor for your county, (4) Member of National Assembly for your constituency, (5) Women Representative for your county, and (6) Member of County Assembly for your ward. You receive six ballot papers — one for each position."
+  },
+
+  {
+    id: "ep_003",
+    source: "Elections Act 2011, Section 62 & 63; Elections (General) Regulations 2012, Regulation 54",
+    section: "Elections Process - Balloting",
+    title: "How do I mark my ballot paper correctly?",
+    keywords: ["ballot", "paper", "mark", "tick", "cross", "box", "vote", "how", "correctly", "karatasi", "sanduku", "What do I do with the ballot paper?", "How do I vote correctly?", "Napiga kura vipi?", "How to use ballot"],
+    content: "A ballot paper shows the names and photos of all candidates for one position. Go into the private voting booth, find the candidate you choose, and make a mark — a tick or X — in the box next to their name. Fold the paper and place it in the sealed ballot box. Do not mark more than one candidate on the same ballot or your vote will be invalid."
+  },
+
+  {
+    id: "ep_004",
+    source: "Elections Act 2011, Section 61; Elections (General) Regulations 2012, Regulation 49",
+    section: "Elections Process - Polling Hours",
+    title: "What time do polling stations open and close?",
+    keywords: ["time", "open", "close", "hours", "morning", "evening", "6am", "5pm", "queue", "saa", "wakati", "What are the voting hours?", "When does voting start and end?", "Can I vote in the evening?", "Kituo kinafunguliwa saa ngapi?"],
+    content: "Polling stations open at 6:00 AM and close at 5:00 PM on election day. If you are in the queue at 5:00 PM when the station closes, you are still entitled to vote — you will not be turned away. Arrive early to avoid long queues."
+  },
+
+  {
+    id: "iebc_001",
+    source: "Constitution of Kenya 2010, Article 88; IEBC Act 2011",
+    section: "IEBC - General Information",
+    title: "What is the IEBC?",
+    keywords: ["IEBC", "commission", "electoral", "what is", "independent", "body", "tume", "role", "Who is the IEBC?", "What does IEBC stand for?", "What does IEBC do?", "IEBC ni nini?"],
+    content: "IEBC stands for the Independent Electoral and Boundaries Commission. It is the official body established by the Constitution to conduct all elections and referenda in Kenya. The IEBC registers voters, manages polling stations, counts votes, announces results, and resolves minor electoral disputes. It is fully independent — no government official can direct it."
+  },
+
+  {
+    id: "iebc_002",
+    source: "IEBC Act 2011",
+    section: "IEBC - Support Contacts",
+    title: "How do I contact the IEBC?",
+    keywords: ["contact", "phone", "number", "website", "email", "helpline", "toll free", "office", "wasiliana", "0800", "What is the IEBC phone number?", "How do I reach IEBC?", "IEBC website", "Nawasiliana na IEBC vipi?"],
+    content: "Contact the IEBC through: Website: iebc.or.ke | Toll-free telephone: 0800 724 242 (free from any phone) | Email: info@iebc.or.ke | You can also visit any of the 47 county IEBC offices across Kenya."
+  },
+
+  {
+    id: "pe_001",
+    source: "Constitution of Kenya 2010, Article 138",
+    section: "Presidential Elections - Criteria",
+    title: "How is the President of Kenya elected?",
+    keywords: ["president", "elect", "win", "percentage", "50%", "half", "counties", "24", "runoff", "rais", "how", "How do we elect the President?", "What does a presidential candidate need to win?", "What percentage of votes does the President need?", "Rais anachaguliwaje?"],
+    content: "To win the presidential election, a candidate must receive more than half (50% + 1) of all valid votes cast nationally, AND receive at least 25% of votes in at least 24 of the 47 counties. If no candidate meets both conditions, a runoff election is held within 30 days between the top two candidates."
+  },
+
+  {
+    id: "pe_002",
+    source: "Constitution of Kenya 2010, Articles 137 & 142",
+    section: "Presidential Elections - Qualifications",
+    title: "Who can run for President in Kenya?",
+    keywords: ["president", "candidate", "qualify", "requirements", "age", "degree", "two terms", "rais", "run", "What are the requirements to be President?", "Presidential candidate qualifications", "Nani anaweza kuwa Rais?"],
+    content: "To run for President, a person must: be a Kenyan citizen by birth; be at least 35 years old; hold a university degree recognised in Kenya; be nominated by a registered political party; and not have been convicted of a criminal offence. A person can only serve as President for a maximum of two terms of five years each."
+  },
+
+  {
+    id: "ce_001",
+    source: "Constitution of Kenya 2010, Article 179 & 183",
+    section: "County Elections - Governor Role",
+    title: "What does a Governor do?",
+    keywords: ["governor", "county", "role", "responsible", "health", "hospital", "roads", "gavana", "services", "What is the role of a county governor?", "Why do I vote for a governor?", "What services does the governor provide?", "Gavana anafanya nini?"],
+    content: "The Governor is the head of the county government. They are responsible for managing all county services including local roads, health centres, hospitals and dispensaries, early childhood education, agriculture support, and local markets. The Governor appoints the county executive committee and is fully accountable to county residents."
+  },
+
+  {
+    id: "ce_002",
+    source: "Constitution of Kenya 2010, Article 177 & 185",
+    section: "County Elections - MCA Role",
+    title: "What does an MCA do?",
+    keywords: ["MCA", "county assembly", "ward", "member", "role", "representative", "budget", "laws", "kata", "What is a Member of County Assembly?", "Why should I vote for an MCA?", "MCA anafanya nini?", "ward representative"],
+    content: "An MCA (Member of County Assembly) represents your specific ward in the county assembly. They debate and pass county laws and budgets, hold the county government accountable, and raise issues affecting your ward. They are the closest elected official to your community."
+  },
+
+  {
+    id: "eo_001",
+    source: "Election Offences Act 2016, Section 9",
+    section: "Election Offences - Bribery",
+    title: "Is it illegal to accept money for your vote?",
+    keywords: ["bribery", "money", "paid", "vote buying", "illegal", "offence", "fine", "prison", "rushwa", "accept", "What is vote buying?", "Can I be paid to vote?", "What happens if someone offers me money to vote?", "Rushwa ya uchaguzi ni nini?", "bribery election"],
+    content: "Yes, accepting money or gifts in exchange for your vote is a serious criminal offence called electoral bribery. It is also illegal to offer or demand such payments. If convicted, a person can be fined up to one million shillings or imprisoned for up to three years, or both. Report any bribery to the IEBC toll-free line 0800 724 242 or the police."
+  },
+
+  {
+    id: "eo_002",
+    source: "Election Offences Act 2016, Section 10 & 11",
+    section: "Election Offences - Intimidation",
+    title: "What is voter intimidation?",
+    keywords: ["intimidation", "threat", "violence", "force", "scare", "fear", "illegal", "report", "vitisho", "threaten", "Can someone threaten me to vote a certain way?", "What if someone threatens me at the polling station?", "Is threatening voters illegal?", "Vitisho vya uchaguzi ni nini?"],
+    content: "Voter intimidation is when someone uses threats, violence, or fear to force you to vote in a particular way or to stop you from voting. This is a criminal offence. No one — not a politician, community leader, employer, or family member — can legally force your vote. Report immediately to IEBC officials at the polling station or the nearest police station."
+  },
+
+  {
+    id: "eo_003",
+    source: "Election Offences Act 2016; Elections Act 2011, Section 109",
+    section: "Election Offences - Fraud/Malpractice",
+    title: "How do I report election fraud?",
+    keywords: ["fraud", "cheat", "report", "malpractice", "irregularity", "observe", "evidence", "udanganyifu", "rigging", "How do I report election malpractice?", "Who do I tell if I see cheating during elections?", "Niripoti wapi udanganyifu wa uchaguzi?"],
+    content: "If you witness election fraud: (1) Report to IEBC officials at the polling station immediately. (2) Call the IEBC toll-free line: 0800 724 242. (3) Report to the nearest police station. (4) Contact accredited election observers. You can report anonymously if you fear for your safety."
+  },
+
+  {
+    id: "pr_001",
+    source: "Constitution of Kenya 2010, Article 38",
+    section: "Political Rights - General Freedoms",
+    title: "What are my political rights as a Kenyan citizen?",
+    keywords: ["political rights", "freedom", "party", "candidate", "campaign", "choice", "haki", "kisiasa", "rights", "What political freedoms do I have?", "Can I join any political party?", "Do I have the right to vote?", "Nina haki gani za kisiasa?"],
+    content: "The Constitution guarantees every citizen the right to: make political choices freely; register as a voter; vote by secret ballot; be a candidate for public office if you qualify; join or leave any political party of your choice; and campaign for a candidate or cause you believe in. These rights cannot be taken away."
+  },
+
+  {
+    id: "rd_001",
+    source: "Constitution of Kenya 2010, Article 105 & 163; Elections Act 2011, Section 75",
+    section: "Results and Disputes - Challenges",
+    title: "How do I challenge election results I believe are wrong?",
+    keywords: ["dispute", "results", "petition", "challenge", "rigged", "court", "Supreme Court", "appeal", "matokeo", "wrong", "How do I petition against election results?", "What if I think the election was rigged?", "Ninapinga matokeo ya uchaguzi vipi?", "dispute results"],
+    content: "You have the right to file an election petition in court. For presidential elections, petitions go to the Supreme Court within 7 days of the results announcement. For other elections, petitions go to the High Court within 28 days. You need a lawyer to file a petition. The court can order a new election if fraud is proven."
+  },
+
+  {
+    id: "rd_002",
+    source: "Constitution of Kenya 2010, Article 138(10); Elections Act 2011, Section 83",
+    section: "Results and Disputes - Announcements",
+    title: "When are presidential election results announced?",
+    keywords: ["results", "announce", "days", "when", "tallying", "Bomas", "chairperson", "matokeo", "7 days", "How long does it take to get presidential results?", "When will we know who won?", "Matokeo ya rais yanatangazwa lini?"],
+    content: "The IEBC must announce final presidential results within 7 days of the election. Preliminary results from individual polling stations are announced immediately after counting at each station. The IEBC Chairperson announces the final verified national results — usually at Bomas of Kenya in Nairobi."
+  },
+
+  {
+    id: "sr_001",
+    source: "Elections Act 2011, Section 67 & 68; Elections (General) Regulations 2012, Regulation 60",
+    section: "Senior Rights - Voting Priority",
+    title: "Do senior citizens get special help when voting?",
+    keywords: ["senior", "elderly", "old", "priority", "queue", "assistance", "help", "wazee", "msaada", "old person", "I am old, will I be helped to vote?", "Is there a priority queue for elderly voters?", "What help is available for old people at polling stations?", "Wazee wanapewa msaada wa kupiga kura?"],
+    content: "Yes. Senior citizens and persons with disabilities are given priority at polling stations — you do not have to stand in the general queue. Go directly to the front and request assistance. IEBC officials are trained to help elderly voters with dignity and patience. If you cannot physically enter the station, an official can come assist you at a convenient nearby location."
+  },
+
+  {
+    id: "sr_002",
+    source: "Constitution of Kenya 2010, Article 57",
+    section: "Senior Rights - Constitutional Protection",
+    title: "What rights do senior citizens have under the Kenyan Constitution?",
+    keywords: ["senior rights", "elderly", "old", "constitution", "Article 57", "dignity", "care", "wazee", "haki", "protection", "Are there laws protecting elderly people in Kenya?", "What does the Constitution say about old people?", "Haki za wazee katika Katiba?", "senior citizen rights"],
+    content: "The Constitution of Kenya protects senior citizens under Article 57. The State must ensure that older members of society are able to participate fully in society; pursue personal development; live in dignity and respect free from abuse; receive reasonable care from their family and State; and have access to social security and health services."
+  },
+
+  // ============================================================
   // CONSTITUTION OF KENYA 2010
   // ============================================================
 

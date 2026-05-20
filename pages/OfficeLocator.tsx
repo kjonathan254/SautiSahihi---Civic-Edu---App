@@ -150,9 +150,9 @@ const OfficeLocator: React.FC<Props> = ({ lang, t }) => {
                     href={`https://www.google.com/maps/search/IEBC+Office+${office.constituency}+${office.county}`} 
                     target="_blank" 
                     onClick={() => trackVisit(office)}
-                    className="py-6 bg-slate-50 dark:bg-slate-700 rounded-3xl flex items-center justify-center gap-3 font-black text-[#135bec] active:scale-95 transition-transform border-2 border-transparent hover:border-blue-100"
+                    className="py-6 bg-[#135bec] text-white rounded-[2rem] flex items-center justify-center gap-4 font-black text-2xl active:scale-95 transition-all shadow-xl shadow-blue-500/10 border-b-8 border-blue-900"
                   >
-                    <span className="material-symbols-outlined text-3xl">directions</span> 
+                    <span className="material-symbols-outlined text-4xl filled">directions</span> 
                     SEE ON MAP
                   </a>
                 </div>

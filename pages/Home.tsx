@@ -126,16 +126,16 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-1000 pb-20">
       
-      <section className="bg-white dark:bg-slate-900 p-8 rounded-[3.5rem] shadow-xl border-2 border-white dark:border-slate-800">
+      <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-xl border-2 border-white dark:border-slate-800">
         <div className="space-y-1 text-center sm:text-left">
-          <h2 className="text-5xl font-black tracking-tighter text-[#135bec]">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-[#135bec] leading-tight break-words">
             {getGreeting()}
           </h2>
-          <p className="text-2xl text-gray-500 dark:text-gray-400 font-bold tracking-tight">{t.welcome}</p>
+          <p className="text-xl sm:text-2xl text-gray-500 dark:text-gray-400 font-bold tracking-tight">{t.welcome}</p>
         </div>
       </section>
 
-      <div className="relative aspect-[16/9] rounded-[4rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] bg-slate-950 border-4 border-white dark:border-slate-800">
+      <div className="relative aspect-[16/9] min-h-[230px] rounded-[2.5rem] sm:rounded-[4rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] bg-slate-950 border-4 border-white dark:border-slate-800">
         {heroImages[activeMood] ? (
           <img src={heroImages[activeMood]} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${isGeneratingHero ? 'opacity-30' : 'opacity-100'}`} alt="Generated Civic Vision" referrerPolicy="no-referrer" />
         ) : (
@@ -148,23 +148,23 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
              <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Generating Vision...</span>
           </div>
         )}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-3 z-10 text-center">
-          <div className="size-16 drop-shadow-[0_0_25px_rgba(255,140,0,0.4)] shrink-0"><SautiLogo /></div>
-          <div className="space-y-3">
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 gap-2 sm:gap-3 z-10 text-center">
+          <div className="size-12 sm:size-16 drop-shadow-[0_0_25px_rgba(255,140,0,0.4)] shrink-0"><SautiLogo /></div>
+          <div className="space-y-1 sm:space-y-3">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
               {activeMood === 'queue' && "The Power of Patience"}
               {activeMood === 'ink' && "The Seal of Duty"}
               {activeMood === 'papers' && "Your Choice, Your Voice"}
               {activeMood === 'winner' && "Peaceful Progress"}
             </h1>
-            <p className="text-lg font-bold text-blue-200 leading-tight max-w-[95%] mx-auto drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)]">
+            <p className="text-xs sm:text-base md:text-lg font-bold text-blue-200 leading-tight max-w-[95%] mx-auto drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)]">
               {activeMood === 'queue' && "Queuing together as one Kenya, one people."}
               {activeMood === 'ink' && "Wear your mark of truth with dignity."}
               {activeMood === 'papers' && "Six choices to define our shared future."}
               {activeMood === 'winner' && "Honoring the will of the people in peace."}
             </p>
           </div>
-          <div className="flex gap-4 pt-2 border-t border-white/20 w-full max-w-xs justify-center shrink-0">
+          <div className="flex gap-2 sm:gap-4 pt-1 sm:pt-2 border-t border-white/20 w-full max-w-xs justify-center shrink-0 scale-90 sm:scale-100">
             <div className="flex flex-col items-center gap-1">
               <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Clarity</span>
               <div className="h-1 w-8 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
@@ -203,7 +203,21 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
             <span className="material-symbols-outlined">{isQuickLoading ? 'sync' : 'send'}</span>
           </button>
         </div>
-        {quickResponse && (
+        {isQuickLoading && (
+          <div className="p-8 bg-blue-50/10 dark:bg-blue-900/5 rounded-[3rem] border-2 border-blue-100/20 dark:border-blue-900/20 animate-pulse shadow-inner space-y-4">
+             <div className="flex items-center gap-2 mb-4">
+                <div className="size-8 bg-blue-400/25 rounded-full animate-bounce shrink-0" />
+                <div className="w-32 h-4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+             </div>
+             <div className="space-y-3">
+               <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-full"></div>
+               <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-[92%]"></div>
+               <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-[80%]"></div>
+             </div>
+          </div>
+        )}
+
+        {quickResponse && !isQuickLoading && (
           <div className="p-8 bg-blue-50/30 dark:bg-blue-900/10 rounded-[3rem] border-2 border-blue-100 dark:border-blue-900/30 animate-in slide-in-from-top-4 duration-500 shadow-inner">
              <div className="flex items-center gap-2 mb-4">
                 <div className="size-8 bg-[#135bec] rounded-full flex items-center justify-center">
@@ -230,22 +244,26 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
             <button 
               key={mood.id} 
               onClick={() => handleMoodChange(mood.id)} 
-              className={`flex items-center gap-3 pl-2 pr-6 py-2 rounded-full transition-all border-2 font-black uppercase text-[10px] tracking-widest ${activeMood === mood.id ? 'bg-[#135bec] border-[#135bec] text-white shadow-xl scale-105' : 'bg-white dark:bg-gray-800 border-white dark:border-gray-700 text-gray-400 hover:border-blue-200'}`}
+              className={`flex items-center gap-3 pl-2 pr-6 py-2 rounded-full transition-all border-4 font-black uppercase text-[10px] tracking-widest cursor-pointer ${
+                activeMood === mood.id 
+                  ? 'bg-[#135bec] border-[#135bec] text-white shadow-xl scale-105' 
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-sm'
+              }`}
             >
               <div className="size-10 rounded-full overflow-hidden border-2 border-white/20 shrink-0">
                 <img src={heroImages[mood.id] || mood.image} className="w-full h-full object-cover" alt={mood.label} />
               </div>
-              <span className="material-symbols-outlined text-lg">{mood.icon}</span>
+              <span className={`material-symbols-outlined text-lg ${activeMood === mood.id ? 'text-white' : 'text-[#135bec] dark:text-blue-400'}`}>{mood.icon}</span>
               {mood.label}
             </button>
           ))}
       </div>
 
-      <section className="bg-white dark:bg-slate-900 p-8 rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6 relative overflow-hidden">
+      <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6 relative overflow-hidden">
         <div className="flex items-center justify-between">
            <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span>
-              <h3 className="text-3xl font-black tracking-tighter uppercase">{t.latestNews}</h3>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase">{t.latestNews}</h3>
            </div>
            <button onClick={handleListenToNews} disabled={!news || isReadingNews} className={`p-4 rounded-2xl shadow-lg transition-all active:scale-90 ${isReadingNews ? 'bg-red-600 text-white animate-pulse' : 'bg-blue-50 text-[#135bec]'}`}>
              <span className="material-symbols-outlined text-3xl">{isReadingNews ? 'graphic_eq' : 'volume_up'}</span>
@@ -258,21 +276,21 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
       </section>
 
       {/* NEW SECTION: The Voter's Charter (Replacing National Pulse) */}
-      <section className="bg-slate-900 text-white p-10 rounded-[4rem] shadow-2xl space-y-6 relative overflow-hidden border-4 border-white/10">
+      <section className="bg-slate-900 text-white p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] shadow-2xl space-y-6 relative overflow-hidden border-4 border-white/10">
         <div className="absolute -right-20 -top-20 size-60 bg-[#135bec] opacity-20 blur-[80px]" />
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex items-center justify-between gap-4">
            <div>
-              <h3 className="text-3xl font-black tracking-tighter uppercase">The Voter's Charter</h3>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase">The Voter's Charter</h3>
               <p className="text-xs font-black text-blue-400 uppercase tracking-widest">{VOTERS_CHARTER.source}</p>
            </div>
-           <div className="bg-white/10 px-4 py-2 rounded-full flex items-center gap-2 border border-white/20">
+           <div className="bg-white/10 px-4 py-2 rounded-full flex items-center gap-2 border border-white/20 shrink-0">
               <span className="material-symbols-outlined text-amber-500 text-xl filled">gavel</span>
               <span className="text-[10px] font-black uppercase tracking-widest">{VOTERS_CHARTER.article}</span>
            </div>
         </div>
 
-        <div className="relative z-10 bg-white/5 p-8 rounded-[2.5rem] border border-white/10">
-           <p className="text-2xl font-bold italic leading-relaxed text-blue-50">
+        <div className="relative z-10 bg-white/5 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/10">
+           <p className="text-xl sm:text-2xl font-bold italic leading-relaxed text-blue-50">
              "{VOTERS_CHARTER.content}"
            </p>
         </div>
@@ -287,22 +305,22 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
       </section>
 
       <div className="grid grid-cols-1 gap-6">
-        <button onClick={() => { hapticTap(); onNavigate('fact-checker'); }} className="p-10 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-[4rem] shadow-2xl flex items-center gap-8 active:scale-95 transition-all text-left group overflow-hidden relative">
-          <div className="size-24 bg-white/20 rounded-[2rem] flex items-center justify-center shrink-0 border-2 border-white/20"><span className="material-symbols-outlined text-6xl filled">fact_check</span></div>
-          <div className="space-y-1"><h4 className="font-black text-4xl tracking-tighter">{t.factChecker}</h4><p className="font-bold opacity-90 text-xl italic leading-tight">Identify truth from rumors instantly.</p></div>
+        <button onClick={() => { hapticTap(); onNavigate('fact-checker'); }} className="p-6 sm:p-10 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-[2.5rem] sm:rounded-[4rem] shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 active:scale-95 transition-all text-left group overflow-hidden relative">
+          <div className="size-16 sm:size-24 bg-white/20 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center shrink-0 border-2 border-white/20"><span className="material-symbols-outlined text-4xl sm:text-6xl filled">fact_check</span></div>
+          <div className="space-y-1"><h4 className="font-black text-3xl sm:text-4xl tracking-tighter">{t.factChecker}</h4><p className="font-bold opacity-90 text-lg sm:text-xl italic leading-tight">Identify truth from rumors instantly.</p></div>
         </button>
         
-        <button onClick={() => { hapticTap(); onNavigate('learn'); }} className="p-12 bg-emerald-600 text-white rounded-[4rem] shadow-2xl flex flex-col gap-6 active:scale-95 transition-all text-left">
-          <span className="material-symbols-outlined text-7xl filled">school</span>
+        <button onClick={() => { hapticTap(); onNavigate('learn'); }} className="p-8 sm:p-12 bg-emerald-600 text-white rounded-[2.5rem] sm:rounded-[4rem] shadow-2xl flex flex-col gap-6 active:scale-95 transition-all text-left">
+          <span className="material-symbols-outlined text-5xl sm:text-7xl filled">school</span>
           <div>
-            <h4 className="font-black text-4xl tracking-tighter">{t.learn}</h4>
-            <p className="font-bold opacity-80 text-xl">Civic Academy</p>
+            <h4 className="font-black text-3xl sm:text-4xl tracking-tighter">{t.learn}</h4>
+            <p className="font-bold opacity-80 text-lg sm:text-xl">Civic Academy</p>
           </div>
         </button>
       </div>
 
-      <section className="bg-white dark:bg-slate-900 p-10 rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6">
-        <div className="flex items-center gap-4"><div className="bg-[#135bec] p-3 rounded-2xl text-white"><span className="material-symbols-outlined text-3xl filled">account_balance</span></div><div><h3 className="text-3xl font-black tracking-tighter">IEBC Support Desk</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Direct Access</p></div></div>
+      <section className="bg-white dark:bg-slate-900 p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-6">
+        <div className="flex items-center gap-4"><div className="bg-[#135bec] p-3 rounded-2xl text-white shrink-0"><span className="material-symbols-outlined text-3xl filled">account_balance</span></div><div><h3 className="text-2xl sm:text-3xl font-black tracking-tighter leading-tight">IEBC Support Desk</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Direct Access</p></div></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <a href={`tel:${IEBC_HQ_INFO.phone}`} className="flex items-center gap-5 p-6 bg-blue-50 dark:bg-slate-800 rounded-3xl border-2 border-transparent hover:border-[#135bec]/20 transition-all"><span className="material-symbols-outlined text-emerald-600 text-4xl">call</span><div><p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Call HQ</p><span className="text-2xl font-black text-slate-800 dark:text-white">{IEBC_HQ_INFO.phone}</span></div></a>
           <a href={`https://wa.me/${IEBC_HQ_INFO.whatsapp}`} className="flex items-center gap-5 p-6 bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl border-2 border-transparent hover:border-emerald-500/20 transition-all"><span className="material-symbols-outlined text-emerald-500 text-4xl">chat</span><div><p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">WhatsApp</p><span className="text-2xl font-black text-slate-800 dark:text-white">Message</span></div></a>

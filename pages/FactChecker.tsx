@@ -152,6 +152,34 @@ const FactChecker: React.FC<Props> = ({ lang, t }) => {
         </label>
       </div>
 
+      {loading && (
+        <div className="animate-pulse space-y-4">
+          <div className="p-8 rounded-[3.5rem] border-4 border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900 shadow-2xl space-y-8">
+            <div className="flex justify-end">
+               <div className="w-32 h-6 bg-slate-200 dark:bg-slate-800 rounded-full" />
+            </div>
+
+            <div className="flex flex-col items-center text-center space-y-6 mb-8">
+              <div className="size-32 bg-slate-200 dark:bg-slate-800 rounded-full animate-bounce duration-1000" />
+              <div className="w-56 h-12 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+              <div className="w-[85%] h-8 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+            </div>
+            
+            <div className="space-y-4 bg-white/50 dark:bg-slate-950/45 p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800">
+              <div className="w-32 h-4 bg-slate-200 dark:bg-slate-800 rounded-full mb-3" />
+              <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-full w-full" />
+              <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-full w-[94%]" />
+              <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-full w-[80%]" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+               <div className="h-14 bg-slate-200 dark:bg-slate-800 rounded-[2.5rem]" />
+               <div className="h-14 bg-slate-200 dark:bg-slate-800 rounded-[2.5rem]" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {result && (
         <div className="animate-in zoom-in duration-500 space-y-4">
           <div className={`p-8 rounded-[3.5rem] border-4 shadow-2xl ${

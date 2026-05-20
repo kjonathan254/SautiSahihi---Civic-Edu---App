@@ -10,13 +10,34 @@ interface Props {
   t: TranslationSet;
 }
 
+const getCategoryBorderClass = (category: string) => {
+  const c = category.toLowerCase();
+  if (c.includes('tech')) return 'border-l-blue-600 dark:border-l-blue-500';
+  if (c.includes('fin')) return 'border-l-emerald-600 dark:border-l-emerald-500';
+  if (c.includes('over')) return 'border-l-teal-600 dark:border-l-teal-500';
+  if (c.includes('leg')) return 'border-l-amber-600 dark:border-l-amber-500';
+  if (c.includes('right')) return 'border-l-orange-500 dark:border-l-orange-400';
+  if (c.includes('rep')) return 'border-l-violet-600 dark:border-l-violet-500';
+  if (c.includes('equal')) return 'border-l-pink-600 dark:border-l-pink-500';
+  if (c.includes('acc')) return 'border-l-rose-600 dark:border-l-rose-500';
+  if (c.includes('dev')) return 'border-l-cyan-600 dark:border-l-cyan-500';
+  if (c.includes('peace')) return 'border-l-green-600 dark:border-l-green-500';
+  if (c.includes('date')) return 'border-l-slate-600 dark:border-l-slate-500';
+  if (c.includes('proc')) return 'border-l-indigo-600 dark:border-l-indigo-500';
+  if (c.includes('verif')) return 'border-l-sky-600 dark:border-l-sky-500';
+  if (c.includes('safe')) return 'border-l-red-600 dark:border-l-red-500';
+  if (c.includes('plan')) return 'border-l-fuchsia-600 dark:border-l-fuchsia-500';
+  return 'border-l-[#135bec]';
+};
+
 const LearnCard: React.FC<{
   topic: LearnTopic;
   idx: number;
   lang: AppLanguage;
   onSelect: (topic: any) => void;
   langCode: string;
-}> = ({ topic, idx, lang, onSelect, langCode }) => {
+  featured?: boolean;
+}> = ({ topic, idx, lang, onSelect, langCode, featured = false }) => {
   const [content, setContent] = useState<{ summary: string; detailed: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [image, setImage] = useState<string>(topic.image);
@@ -70,55 +91,79 @@ const LearnCard: React.FC<{
     play();
   };
 
+  const borderClass = getCategoryBorderClass(topic.category);
+
   return (
     <div 
       ref={cardRef}
-      className="bg-white dark:bg-gray-800 rounded-[4rem] shadow-2xl overflow-hidden border-4 border-transparent hover:border-[#135bec] transition-all flex flex-col group animate-in slide-in-from-bottom-8 duration-700"
+      className={`bg-[#fafaf8] dark:bg-slate-900 rounded-[3rem] shadow-[0_15px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_15px_30px_rgba(0,0,0,0.25)] border-l-[6px] ${borderClass} overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group animate-in slide-in-from-bottom-8 duration-700 ${featured ? 'scale-100 ring-2 ring-[#135bec]/10' : 'scale-[0.98]'}`}
     >
-      <div className="relative h-72 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
-        {imageLoading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-700">
-            <span className="material-symbols-outlined text-6xl animate-pulse">image</span>
-            <p className="text-[10px] font-black uppercase mt-2 tracking-widest text-[#135bec]">Generating Design...</p>
-          </div>
-        ) : (
+      {/* Blurred Image Backdrop Header */}
+      <div className={`relative ${featured ? 'h-80' : 'h-64'} w-full bg-slate-100 dark:bg-slate-950 overflow-hidden flex items-center justify-center`}>
+        {!imageError && !imageLoading && (
           <img 
             src={image} 
-            className={`w-full h-full object-cover transition-opacity duration-400 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} 
-            alt={topic.title} 
-            onError={() => setImageError(true)}
+            className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 dark:opacity-50 scale-125 select-none pointer-events-none" 
+            alt="" 
+            referrerPolicy="no-referrer"
           />
         )}
         
-        {/* Placeholder on failure */}
-        {imageError && !imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-             <span className="text-6xl">🇰🇪</span>
-          </div>
-        )}
+        {/* Soft dark vignette gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
 
-        <div className="absolute top-6 left-6 flex flex-col gap-3">
-          <div className="bg-[#135bec] text-white px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl border-2 border-white/20">{topic.category}</div>
+        {/* Foreground beautifully framed image */}
+        <div className="relative z-10 w-[92%] h-[85%] rounded-[2rem] overflow-hidden shadow-xl border border-white/20 dark:border-white/10">
+          {imageLoading ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-700">
+              <span className="material-symbols-outlined text-5xl animate-pulse">image</span>
+            </div>
+          ) : (
+            <img 
+              src={image} 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+              alt={topic.title} 
+              onError={() => setImageError(true)}
+            />
+          )}
+          {imageError && !imageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+               <span className="text-5xl">🇰🇪</span>
+            </div>
+          )}
+        </div>
+
+        {/* Floating Category Tag inside Header */}
+        <div className="absolute top-6 left-6 z-20 flex items-center gap-2">
+          {featured && (
+            <span className="bg-[#135bec] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1 animate-pulse">
+              <span className="material-symbols-outlined text-xs filled !text-white">star</span>
+              FEATURED STUDY
+            </span>
+          )}
+          <div className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg border border-slate-200/50 dark:border-slate-800">
+            {topic.category}
+          </div>
         </div>
 
         {/* Instant Play Button */}
         <button 
           onClick={handlePlayClick}
           disabled={isPreloading && !isReady}
-          className={`absolute bottom-6 right-6 size-16 rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 ${isReady ? 'bg-white/95 text-[#135bec]' : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'}`}
+          className={`absolute bottom-6 right-8 z-20 size-14 rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 ${isReady ? 'bg-white text-[#135bec] dark:bg-slate-900 dark:text-blue-400' : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'}`}
         >
           {isPreloading && !isReady ? (
-            <span className="material-symbols-outlined animate-spin text-3xl">sync</span>
+            <span className="material-symbols-outlined animate-spin text-2xl">sync</span>
           ) : isPlaying ? (
-            <span className="material-symbols-outlined text-4xl">stop</span>
+            <span className="material-symbols-outlined text-3xl">stop</span>
           ) : (
-            <span className="material-symbols-outlined text-4xl">{isReady ? 'play_arrow' : 'volume_up'}</span>
+            <span className="material-symbols-outlined text-3xl">{isReady ? 'play_arrow' : 'volume_up'}</span>
           )}
         </button>
       </div>
 
       <div className="p-10 space-y-6">
-        <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">{topic.title}</h3>
+        <h3 className={`${featured ? 'text-5xl' : 'text-4xl'} font-black text-slate-900 dark:text-white leading-tight tracking-tighter`}>{topic.title}</h3>
         
         {loading ? (
           <div className="space-y-4 animate-pulse py-2">
@@ -128,14 +173,18 @@ const LearnCard: React.FC<{
             <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-full w-3/4 shadow-sm"></div>
           </div>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400 text-2xl font-bold leading-tight line-clamp-2 italic">
+          <p className="text-slate-600 dark:text-slate-300 text-2xl font-bold leading-tight line-clamp-2 italic">
             {content?.summary || topic.summary}
           </p>
         )}
 
         <button 
           onClick={() => onSelect({ ...topic, detailedContent: content?.detailed || topic.detailedContent })} 
-          className="w-full py-6 bg-blue-50 dark:bg-blue-900/30 text-[#135bec] rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 border-2 border-[#135bec]/10 active:scale-[0.98] transition-all"
+          className={`w-full py-6 rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all ${
+            featured 
+              ? 'bg-[#135bec] text-white shadow-xl hover:bg-blue-700' 
+              : 'bg-blue-50/70 dark:bg-slate-800 text-[#135bec] dark:text-blue-400 border-2 border-[#135bec]/10'
+          }`}
           disabled={loading}
         >
           {loading ? 'Initializing...' : 'Read Story'}
@@ -219,6 +268,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
             lang={lang} 
             langCode={lang} 
             onSelect={setSelectedTopic}
+            featured={idx === 0 && searchQuery.trim() === ''}
           />
         ))}
       </div>
