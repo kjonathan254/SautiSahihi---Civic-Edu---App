@@ -53,7 +53,7 @@ export async function fastAIResponse(prompt: string, language: AppLanguage = 'EN
     // FALLBACK: If 429 or any error, try to use ANY local match even if weak
     if (localResults.length > 0) {
       const r = localResults[0];
-      return `${r.content.trim()}\n\n[Local Knowledge Base Fallback]\nSource: ${r.source}\nSection: ${r.section}`;
+      return `${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`;
     }
     return "I am having trouble connecting to my reasoning engines (Service potentially busy). Please try later or check our FAQs.";
   }
@@ -247,7 +247,7 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
       if (localResults.length > 0) {
         const r = localResults[0];
         return { 
-          text: `[SYSTEM: QUOTA LIMIT] I am unable to connect to my deeper reasoning engine right now, but I found this in my local records:\n\n${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`, 
+          text: `${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`, 
           links: [] 
         };
       }
