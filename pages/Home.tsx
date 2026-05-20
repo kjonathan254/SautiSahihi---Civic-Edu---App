@@ -148,23 +148,23 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
              <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Generating Vision...</span>
           </div>
         )}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 space-y-4 z-10 text-center">
-          <div className="size-20 mb-2 drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"><SautiLogo /></div>
-          <div className="space-y-2">
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-3 z-10 text-center">
+          <div className="size-16 drop-shadow-[0_0_25px_rgba(255,140,0,0.4)] shrink-0"><SautiLogo /></div>
+          <div className="space-y-3">
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-tight">
               {activeMood === 'queue' && "The Power of Patience"}
               {activeMood === 'ink' && "The Seal of Duty"}
               {activeMood === 'papers' && "Your Choice, Your Voice"}
               {activeMood === 'winner' && "Peaceful Progress"}
             </h1>
-            <p className="text-xl font-bold text-blue-200 leading-tight max-w-[85%] mx-auto drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)]">
+            <p className="text-lg font-bold text-blue-200 leading-tight max-w-[95%] mx-auto drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)]">
               {activeMood === 'queue' && "Queuing together as one Kenya, one people."}
               {activeMood === 'ink' && "Wear your mark of truth with dignity."}
               {activeMood === 'papers' && "Six choices to define our shared future."}
               {activeMood === 'winner' && "Honoring the will of the people in peace."}
             </p>
           </div>
-          <div className="flex gap-4 pt-4 border-t border-white/20 w-full max-w-xs justify-center">
+          <div className="flex gap-4 pt-2 border-t border-white/20 w-full max-w-xs justify-center shrink-0">
             <div className="flex flex-col items-center gap-1">
               <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Clarity</span>
               <div className="h-1 w-8 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]" />

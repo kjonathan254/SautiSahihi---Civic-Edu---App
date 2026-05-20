@@ -1,7 +1,6 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Verdict, FactCheckResult, AppLanguage, GroundingLink } from './types.ts';
 import { saveToCache, getFromCache } from './utils.ts';
-import { nvidiaChat, nvidiaGenerateImage } from './nvidiaService.ts';
 import { searchCivicKnowledge } from './lib/searchKnowledge.ts';
 
 // Singleton AudioContext
@@ -41,15 +40,7 @@ export async function fastAIResponse(prompt: string, language: AppLanguage = 'EN
   Use the following context if relevant:
   ${context}`;
 
-  // 1. Try NVIDIA First (High Speed)
-  try {
-    const text = await nvidiaChat([{ role: 'user', content: enhancedPrompt }], "meta/llama-3.1-8b-instruct");
-    if (text && text.length > 10) return text;
-  } catch (e) {
-    console.warn("NVIDIA fast response failed, falling back to Gemini.");
-  }
-
-  // 2. Fallback to Gemini
+  // Primary engine is Gemini for this app
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
@@ -57,8 +48,14 @@ export async function fastAIResponse(prompt: string, language: AppLanguage = 'EN
       contents: [{ role: 'user', parts: [{ text: enhancedPrompt }] }]
     });
     return response.text || "I am unable to provide a verified answer at this time. Please check your registration status at an IEBC office.";
-  } catch (e) {
-    return "I am having trouble connecting to my reasoning engines. Please try again.";
+  } catch (e: any) {
+    console.warn("Gemini fast response failed:", e);
+    // FALLBACK: If 429 or any error, try to use ANY local match even if weak
+    if (localResults.length > 0) {
+      const r = localResults[0];
+      return `${r.content.trim()}\n\n[Local Knowledge Base Fallback]\nSource: ${r.source}\nSection: ${r.section}`;
+    }
+    return "I am having trouble connecting to my reasoning engines (Service potentially busy). Please try later or check our FAQs.";
   }
 }
 
@@ -92,21 +89,6 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
     console.error("Gemini Fact Check failed, attempting NVIDIA fallback", e);
   }
 
-  // 2. If Gemini failed OR for Cross-Verification
-  try {
-    const checkPrompt = geminiResult 
-      ? `Verify this fact-check result for accuracy: Claim: "${claim}", Verdict: "${geminiResult.verdict}", Explanation: "${geminiResult.explanation}". Refine it for a Kenyan context. Respond in JSON. ${citationRule}`
-      : `Fact-check this Kenyan claim: "${claim}". Respond in ${language} using this JSON structure: { verdict: "TRUE"|"FALSE"|"MISLEADING", summary: "one-liner", explanation: "detailed reasoning", sources: [] }. ${citationRule}`;
-    
-    const nvidiaResponse = await nvidiaChat([{ role: "user", content: checkPrompt }]);
-    if (nvidiaResponse) {
-      const refined = JSON.parse(nvidiaResponse.substring(nvidiaResponse.indexOf('{'), nvidiaResponse.lastIndexOf('}') + 1));
-      return { ...refined, groundingLinks };
-    }
-  } catch (e) {
-    console.warn("NVIDIA Fact Check fallback failed.");
-  }
-
   if (geminiResult) {
     return { ...geminiResult, groundingLinks };
   }
@@ -115,7 +97,7 @@ export async function factCheckClaim(claim: string, imageBase64?: string, langua
 }
 
 export async function getLiveNewsSummary(language: AppLanguage): Promise<string> {
-  // 1. Try Gemini first (Best for Live Search/Grounding)
+  // Use Gemini (Best for Live Search/Grounding)
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
     const response = await ai.models.generateContent({
@@ -124,16 +106,11 @@ export async function getLiveNewsSummary(language: AppLanguage): Promise<string>
       config: { tools: [{ googleSearch: {} }] }
     });
     if (response.text) return `[LATEST NEWS] ${response.text}`;
-  } catch (err) { 
-    console.log("Switching news engine...");
-  }
-
-  // 2. Fallback to NVIDIA (Powerful Reasoning)
-  try {
-    const text = await nvidiaChat([{ role: 'user', content: `Summarize the most recent significant civic or political news in Kenya from the last 24-48 hours. Provide a concise 2-sentence summary in ${language}.` }]);
-    if (text) return `[CIVIC UPDATE] ${text}`;
-  } catch (e) {
-    console.warn("NVIDIA News fallback failed.");
+  } catch (err: any) { 
+    if (err?.message?.includes("429") || err?.message?.includes("quota")) {
+       return "[NOTICE] News summaries are temporarily paused due to high demand. Legal resources remain available locally.";
+    }
+    console.error("News engine failed:", err);
   }
 
   return "Checking official Kenyan sources for the latest updates...";
@@ -205,13 +182,20 @@ export async function getLearnTopicContent(topic: string, description: string, l
     Respond in ${language}. 
     Use JSON format: { "summary": "...", "detailed": "..." }`;
     
-    // Offload to NVIDIA Llama 3 for non-factual/educational enrichment
-    const response = await nvidiaChat([{ role: 'user', content: prompt }], "meta/llama-3.1-8b-instruct");
-    const cleaned = response.substring(response.indexOf('{'), response.lastIndexOf('}') + 1);
+    // Use Gemini for educational enrichment
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: { responseMimeType: "application/json" }
+    });
+    const text = response.text || "{}";
+    const cleaned = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
     return JSON.parse(cleaned);
-  } catch (e) {
-    console.error("Failed to enrich learn content with NVIDIA", e);
-    throw e;
+  } catch (e: any) {
+    console.error("Failed to enrich learn content with Gemini", e);
+    // FALLBACK: Return the basic description if AI fails
+    return { summary: topic, detailed: description };
   }
 }
 
@@ -240,19 +224,6 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
   If the information is general and not from a specific law, state the general source of the principle.
   ${context}`;
 
-  // 1. Try NVIDIA (Advanced Reasoning)
-  try {
-    const nvidiaMessages = [
-      { role: "system", content: systemPrompt },
-      ...history.map(h => ({ role: h.role === 'model' ? 'assistant' : h.role, content: h.parts[0].text })),
-      { role: "user", content: message }
-    ];
-    const text = await nvidiaChat(nvidiaMessages);
-    if (text) return { text, links: [] };
-  } catch (e) {
-    console.warn("NVIDIA Assistant failed, falling back to Gemini.");
-  }
-
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || "" });
   try {
     const response = await ai.models.generateContent({
@@ -270,5 +241,18 @@ export async function chatAssistant(message: string, language: AppLanguage, hist
       chunks.forEach((chunk: any) => { if (chunk.web?.uri) links.push({ uri: chunk.web.uri, title: chunk.web.title || "Ref" }); });
     }
     return { text: response.text || "...", links };
-  } catch (e) { return { text: "Connection error.", links: [] }; }
+  } catch (e: any) { 
+    console.warn("Assistant failure:", e);
+    if (e?.message?.includes("429") || e?.message?.includes("quota")) {
+      if (localResults.length > 0) {
+        const r = localResults[0];
+        return { 
+          text: `[SYSTEM: QUOTA LIMIT] I am unable to connect to my deeper reasoning engine right now, but I found this in my local records:\n\n${r.content.trim()}\n\nSource: ${r.source}\nSection: ${r.section}`, 
+          links: [] 
+        };
+      }
+      return { text: "Our AI service is currently at its limit. Please ask a common question or check back in a few minutes.", links: [] };
+    }
+    return { text: "Connection error. Please check your internet and try again.", links: [] }; 
+  }
 }
