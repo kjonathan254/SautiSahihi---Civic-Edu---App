@@ -182,25 +182,25 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
       </div>
       
       {/* Quick Ask Section (Low Latency Flash-Lite) */}
-      <section className="bg-white dark:bg-slate-900 p-8 rounded-[3.5rem] shadow-xl border-4 border-blue-50 dark:border-slate-800 space-y-4">
+      <section className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-xl border-4 border-blue-50 dark:border-slate-800 space-y-4">
         <div className="flex items-center gap-3 mb-2">
-          <span className="material-symbols-outlined text-[#135bec] text-3xl">bolt</span>
+          <span className="material-symbols-outlined text-[#135bec] text-3xl animate-pulse">bolt</span>
           <h3 className="text-2xl font-black tracking-tighter uppercase">Quick Civic Ask</h3>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5 items-center w-full">
           <input 
             value={quickInput}
             onChange={(e) => setQuickInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleQuickAsk()}
             placeholder="Ask a quick question..."
-            className="flex-1 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 font-bold outline-none focus:border-[#135bec] transition-all"
+            className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3.5 font-bold outline-none focus:border-[#135bec] transition-all dark:text-white"
           />
           <button 
             onClick={handleQuickAsk}
             disabled={isQuickLoading || !quickInput.trim()}
-            className="bg-[#135bec] text-white p-3 rounded-2xl shadow-lg active:scale-90 transition-all disabled:opacity-50"
+            className="bg-[#135bec] text-white size-14 rounded-2xl shadow-lg active:scale-90 transition-all disabled:opacity-50 shrink-0 flex items-center justify-center"
           >
-            <span className="material-symbols-outlined">{isQuickLoading ? 'sync' : 'send'}</span>
+            <span className="material-symbols-outlined text-2xl">{isQuickLoading ? 'sync' : 'send'}</span>
           </button>
         </div>
         {isQuickLoading && (

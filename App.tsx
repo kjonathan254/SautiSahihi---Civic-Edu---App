@@ -251,7 +251,7 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex flex-col h-screen font-sans ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <header className={`p-4 shadow-xl sticky top-0 z-50 ${darkMode ? 'bg-slate-900 border-b border-slate-800' : 'bg-white border-b border-gray-100'}`}>
+      <header className={`p-4 shadow-xl shrink-0 sticky top-0 z-50 ${darkMode ? 'bg-slate-900 border-b border-slate-800' : 'bg-white border-b border-gray-100'}`}>
         <div className="flex items-center justify-between max-w-3xl mx-auto">
           <div className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 mr-2" onClick={() => navigateTo('home')}>
             <div className="size-11"><SautiLogo /></div>
@@ -262,8 +262,14 @@ const App: React.FC = () => {
           </button>
         </div>
       </header>
-      <main className="flex-1 overflow-y-auto pb-40"><div className="max-w-3xl mx-auto p-4">{renderContent()}</div></main>
-      <nav className={`fixed bottom-0 left-0 right-0 border-t p-2 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
+      
+      <main className={`flex-1 ${activeTab === 'assistant' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}>
+        <div className={`w-full mx-auto ${activeTab === 'assistant' ? 'flex flex-col flex-1 h-full max-w-3xl' : 'max-w-3xl p-4 pb-12'}`}>
+          {renderContent()}
+        </div>
+      </main>
+
+      <nav className={`border-t p-2 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
         <div className="max-w-3xl mx-auto flex justify-around items-center h-24">
           <NavItem active={activeTab === 'home'} icon="home" label={t.home} onClick={() => navigateTo('home')} highContrast={highContrast} />
           <NavItem active={activeTab === 'fact-checker'} icon="fact_check" label={t.factChecker} onClick={() => navigateTo('fact-checker')} highContrast={highContrast} />

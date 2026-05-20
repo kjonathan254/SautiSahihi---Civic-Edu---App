@@ -307,7 +307,7 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-500 max-w-3xl mx-auto px-4 w-full">
+    <div className="flex flex-col h-full max-h-full animate-in fade-in duration-500 w-full overflow-hidden px-4 py-2">
       
       {/* Top Professional Header Bar */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
@@ -481,7 +481,7 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
               onClick={startListening}
               id="assistant-mic-btn"
               title="Speak to Assistant"
-              className={`size-14 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.4)]' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:hover:bg-slate-700'}`}
+              className={`size-14 rounded-full flex items-center justify-center transition-all shrink-0 ${isListening ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.4)]' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:hover:bg-slate-700'}`}
             >
               <span className="material-symbols-outlined text-2xl">{isListening ? 'graphic_eq' : 'mic'}</span>
             </button>
@@ -492,13 +492,13 @@ const Assistant: React.FC<Props> = ({ lang, t }) => {
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type your question..."
             id="assistant-input-box"
-            className="flex-1 bg-transparent border-none outline-none px-3 py-2 text-xl font-bold dark:text-white placeholder-slate-400"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none px-3 py-2 text-xl font-bold dark:text-white placeholder-slate-400"
           />
           <button 
             onClick={() => handleSend()}
             disabled={!input.trim()}
             id="assistant-send-btn"
-            className="size-14 bg-[#135bec] text-white rounded-full flex items-center justify-center shadow-md hover:bg-blue-700 disabled:opacity-30 disabled:hover:bg-[#135bec] transition-all duration-150 active:scale-95"
+            className="size-14 bg-[#135bec] text-white rounded-full flex items-center justify-center shadow-md hover:bg-blue-700 disabled:opacity-30 disabled:hover:bg-[#135bec] transition-all duration-150 active:scale-95 shrink-0"
           >
             <span className="material-symbols-outlined text-2xl">send</span>
           </button>
