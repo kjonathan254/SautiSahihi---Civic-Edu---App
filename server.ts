@@ -25,7 +25,16 @@ async function startServer() {
     languageStats: { ENG: 0, KIS: 0, GIK: 0, DHO: 0, LUH: 0, KAL: 0, KAM: 0 } as Record<string, number>,
     pollParticipation: 0,
     learnTopicViews: {} as Record<string, number>,
-    assistantQueries: 0
+    assistantQueries: 0,
+    communityReports: [
+      { id: 1, title: "Elder Voter Guide Session", county: "Nyeri", category: "Voter Education", description: "A successful chief baraza was organized with over 40 elder participants to explain the registration guidelines with translated brochures.", status: "VERIFIED", timestamp: "2026-05-28T09:00:00Z" },
+      { id: 2, title: "Peaceful Youth Dialogue", county: "Kisumu", category: "Peace & Accord", description: "Youth leaders gathered at Central Park to pledge peaceful support and support county cohesion.", status: "VERIFIED", timestamp: "2026-05-28T08:30:00Z" }
+    ] as any[],
+    pledges: [
+      { id: 1, name: "Mercy Wanjiku", county: "Nairobi", pledgeText: "I pledge to help my grandparents walk to their polling station safely.", timestamp: "2026-05-28T09:30:00Z" },
+      { id: 2, name: "John Kiprop", county: "Uasin Gishu", pledgeText: "I pledge to advocate for verified facts and peaceful election conduct in my ward.", timestamp: "2026-05-28T08:50:00Z" },
+      { id: 3, name: "Amina Juma", county: "Mombasa", pledgeText: "I pledge to participate in public budget planning and support clear resource distribution.", timestamp: "2026-05-28T08:10:00Z" }
+    ] as any[]
   };
 
   // --- API Routes ---
@@ -112,6 +121,61 @@ async function startServer() {
     };
     data.factChecks.push(newEntry);
     res.json(newEntry);
+  });
+
+  // Community Reports Endpoints
+  app.get("/api/reports", (req, res) => {
+    res.json(data.communityReports);
+  });
+
+  app.post("/api/reports", (req, res) => {
+    const { title, county, category, description, image } = req.body;
+    if (!title || !county || !description) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const newReport = {
+      id: Date.now(),
+      title,
+      county,
+      category: category || "General Observation",
+      description,
+      image: image || null,
+      status: "PENDING", 
+      timestamp: new Date().toISOString()
+    };
+    data.communityReports.push(newReport);
+    res.json({ success: true, report: newReport });
+  });
+
+  app.post("/api/reports/:id/verify", (req, res) => {
+    const report = data.communityReports.find((r: any) => r.id === parseInt(req.params.id));
+    if (report) {
+      report.status = "VERIFIED";
+      res.json({ success: true, report });
+    } else {
+      res.status(404).json({ error: "Report not found" });
+    }
+  });
+
+  // Pledges Endpoints
+  app.get("/api/pledges", (req, res) => {
+    res.json(data.pledges);
+  });
+
+  app.post("/api/pledges", (req, res) => {
+    const { name, county, pledgeText } = req.body;
+    if (!name || !county || !pledgeText) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const newPledge = {
+      id: Date.now(),
+      name,
+      county,
+      pledgeText,
+      timestamp: new Date().toISOString()
+    };
+    data.pledges.push(newPledge);
+    res.json({ success: true, pledge: newPledge });
   });
 
   // --- NVIDIA NIM Proxy Endpoints ---

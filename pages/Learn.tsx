@@ -4,6 +4,7 @@ import { LEARN_TOPICS } from '../constants.tsx';
 import { getLearnTopicContent, speakText } from '../geminiService.ts';
 import { hapticTap } from '../utils.ts';
 import { useAudioPreloader } from '../useAudioPreloader.ts';
+import { CivicQuiz } from '../components/CivicQuiz.tsx';
 
 interface Props {
   lang: AppLanguage;
@@ -208,6 +209,7 @@ const LearnCard: React.FC<{
 };
 
 const Learn: React.FC<Props> = ({ lang, t }) => {
+  const [subTab, setSubTab] = useState<'academy' | 'quiz'>('academy');
   const [selectedTopic, setSelectedTopic] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -243,7 +245,7 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
           <h2 className="text-4xl font-black text-center dark:text-white">{selectedTopic.title}</h2>
           <div className="space-y-6">
              {selectedTopic.detailedContent.split('. ').map((p: string, i: number) => (
-               <p key={i} className="text-2xl leading-relaxed font-bold text-gray-800 dark:text-gray-200">{p}.</p>
+                <p key={i} className="text-2xl leading-relaxed font-bold text-gray-800 dark:text-gray-200">{p}.</p>
              ))}
           </div>
           <p className="text-sm text-center text-slate-400 italic mt-8 tracking-widest font-black uppercase">
@@ -256,35 +258,61 @@ const Learn: React.FC<Props> = ({ lang, t }) => {
 
   return (
     <div className="space-y-10 pb-28">
-      <div className="bg-slate-900 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden">
-        <h2 className="text-5xl font-black mb-1 tracking-tighter uppercase italic">Civic Academy</h2>
-        <p className="text-2xl opacity-80 font-bold italic text-blue-300">Wisdom for our Elders.</p>
-        <span className="absolute -right-10 -bottom-10 material-symbols-outlined text-[15rem] opacity-5 rotate-12">school</span>
+      {/* Premium Segment Control Tab Selector */}
+      <div className="flex bg-slate-100 dark:bg-slate-900 p-2 rounded-3xl gap-2 font-sans border border-slate-200/50 dark:border-slate-800">
+        <button 
+          onClick={() => { hapticTap(); setSubTab('academy'); }}
+          className={`flex-1 py-4 px-3 rounded-2xl text-xs font-black uppercase tracking-tight transition-all flex items-center justify-center gap-2 ${subTab === 'academy' ? 'bg-[#135bec] text-white shadow-lg' : 'text-slate-500'}`}
+        >
+          <span className="material-symbols-outlined text-lg">school</span>
+          Academy
+        </button>
+        <button 
+          onClick={() => { hapticTap(); setSubTab('quiz'); }}
+          className={`flex-1 py-4 px-3 rounded-2xl text-xs font-black uppercase tracking-tight transition-all flex items-center justify-center gap-2 ${subTab === 'quiz' ? 'bg-[#135bec] text-white shadow-lg' : 'text-slate-500'}`}
+        >
+          <span className="material-symbols-outlined text-lg">workspace_premium</span>
+          Quiz Hub
+        </button>
       </div>
 
-      <div className="px-2">
-        <input 
-          type="text" 
-          placeholder="Search for a topic..." 
-          value={searchQuery} 
-          onChange={(e) => setSearchQuery(e.target.value)} 
-          className="w-full px-10 py-8 bg-white dark:bg-gray-800 border-4 border-slate-100 rounded-[3rem] text-2xl font-black shadow-xl outline-none focus:border-[#135bec] transition-all dark:text-white" 
-        />
-      </div>
+      {subTab === 'academy' && (
+        <div className="space-y-10">
+          <div className="bg-slate-900 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden">
+            <h2 className="text-5xl font-black mb-1 tracking-tighter uppercase italic">Civic Academy</h2>
+            <p className="text-2xl opacity-80 font-bold italic text-blue-300">Wisdom for our Elders.</p>
+            <span className="absolute -right-10 -bottom-10 material-symbols-outlined text-[15rem] opacity-5 rotate-12">school</span>
+          </div>
 
-      <div className="grid grid-cols-1 gap-10 px-2">
-        {filteredTopics.map((topic, idx) => (
-          <LearnCard 
-            key={topic.id} 
-            topic={topic} 
-            idx={idx} 
-            lang={lang} 
-            langCode={lang} 
-            onSelect={setSelectedTopic}
-            featured={idx === 0 && searchQuery.trim() === ''}
-          />
-        ))}
-      </div>
+          <div className="px-2">
+            <input 
+              type="text" 
+              placeholder="Search for a topic..." 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+              className="w-full px-10 py-8 bg-white dark:bg-gray-800 border-4 border-slate-100 rounded-[3rem] text-2xl font-black shadow-xl outline-none focus:border-[#135bec] transition-all dark:text-white" 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-10 px-2">
+            {filteredTopics.map((topic, idx) => (
+              <LearnCard 
+                key={topic.id} 
+                topic={topic} 
+                idx={idx} 
+                lang={lang} 
+                langCode={lang} 
+                onSelect={setSelectedTopic}
+                featured={idx === 0 && searchQuery.trim() === ''}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {subTab === 'quiz' && (
+        <CivicQuiz lang={lang} t={t} />
+      )}
     </div>
   );
 };

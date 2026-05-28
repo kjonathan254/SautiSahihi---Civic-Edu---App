@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppLanguage, TranslationSet } from '../types.ts';
 import { getLiveNewsSummary, speakText, fastAIResponse } from '../geminiService.ts';
-import { hapticTap, hapticSuccess } from '../utils.ts';
+import { hapticTap, hapticSuccess, fileToBase64 } from '../utils.ts';
 import { ELECTION_MOODS, IEBC_HQ_INFO, VOTERS_CHARTER } from '../constants.tsx';
 import { SeniorFriendlyText } from './Assistant.tsx';
 
@@ -39,6 +39,11 @@ interface Props {
   onNavigate: (tab: string) => void;
 }
 
+const KENYAN_COUNTIES = [
+  "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Kiambu", 
+  "Kakamega", "Nyeri", "Uasin Gishu", "Machakos", "Meru"
+];
+
 const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   const [news, setNews] = useState('');
   const [activeMood, setActiveMood] = useState(ELECTION_MOODS[0].id);
@@ -57,6 +62,111 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
   const [quickInput, setQuickInput] = useState('');
   const [quickResponse, setQuickResponse] = useState('');
   const [isQuickLoading, setIsQuickLoading] = useState(false);
+
+  // Live Community Hub States
+  const [pledges, setPledges] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [communityTab, setCommunityTab] = useState<'pledges' | 'reports'>('pledges');
+  const [newPledgeName, setNewPledgeName] = useState('');
+  const [newPledgeCounty, setNewPledgeCounty] = useState('Nairobi');
+  const [newPledgeText, setNewPledgeText] = useState('I pledge to promote peace and verify facts.');
+  const [newReportTitle, setNewReportTitle] = useState('');
+  const [newReportCounty, setNewReportCounty] = useState('Nairobi');
+  const [newReportCategory, setNewReportCategory] = useState('Voter Education');
+  const [newReportDesc, setNewReportDesc] = useState('');
+  const [newReportImg, setNewReportImg] = useState<string>('');
+  const [isSubmittingPledge, setIsSubmittingPledge] = useState(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+  const fetchCommunityData = async () => {
+    try {
+      const pRes = await fetch('/api/pledges');
+      if (pRes.ok) {
+        const pData = await pRes.json();
+        setPledges(pData);
+      }
+      const rRes = await fetch('/api/reports');
+      if (rRes.ok) {
+        const rData = await rRes.json();
+        setReports(rData);
+      }
+    } catch (e) {
+      console.error("Failed to fetch community data", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchCommunityData();
+  }, []);
+
+  const handleSubmitPledge = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPledgeName.trim() || !newPledgeText.trim() || isSubmittingPledge) return;
+    hapticTap();
+    setIsSubmittingPledge(true);
+    try {
+      const res = await fetch('/api/pledges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPledgeName,
+          county: newPledgeCounty,
+          pledgeText: newPledgeText
+        })
+      });
+      if (res.ok) {
+        hapticSuccess();
+        setNewPledgeName('');
+        setNewPledgeText('I pledge to promote peace and verify facts.');
+        fetchCommunityData();
+      }
+    } catch (err) {
+      console.error("Pledge failed:", err);
+    } finally {
+      setIsSubmittingPledge(false);
+    }
+  };
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReportTitle.trim() || !newReportDesc.trim() || isSubmittingReport) return;
+    hapticTap();
+    setIsSubmittingReport(true);
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newReportTitle,
+          county: newReportCounty,
+          category: newReportCategory,
+          description: newReportDesc,
+          image: newReportImg || null
+        })
+      });
+      if (res.ok) {
+        hapticSuccess();
+        setNewReportTitle('');
+        setNewReportDesc('');
+        setNewReportImg('');
+        fetchCommunityData();
+      }
+    } catch (err) {
+      console.error("Report failed:", err);
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const base64 = await fileToBase64(file);
+      setNewReportImg(base64);
+      hapticSuccess();
+    } catch (e) {
+      alert("Failed to convert image. Please choose another file.");
+    }
+  };
 
   const handleQuickAsk = async () => {
     if (!quickInput.trim() || isQuickLoading) return;
@@ -302,6 +412,262 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
              <div className="h-1 w-12 bg-emerald-600 rounded-full" />
           </div>
         </div>
+      </section>
+
+      {/* SautiSahihi Community Action Circle */}
+      <section className="bg-white dark:bg-slate-900 p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] border-4 border-[#135bec]/10 shadow-xl space-y-8 animate-in slide-in-from-bottom-5">
+        
+        <div className="flex justify-between items-center gap-4 flex-wrap pb-4 border-b border-slate-150/40">
+           <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#135bec] text-4xl filled">groups</span>
+              <div>
+                 <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight leading-none">Community Hub</h3>
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Peace Pledges & Live Observations</p>
+              </div>
+           </div>
+
+           {/* Tabs */}
+           <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200/20 gap-1 font-sans">
+              <button 
+                type="button"
+                onClick={() => { hapticTap(); setCommunityTab('pledges'); }}
+                className={`px-4 py-2 text-[10px] uppercase tracking-wider font-black rounded-xl transition-all ${communityTab === 'pledges' ? 'bg-[#135bec] text-white shadow' : 'text-slate-500'}`}
+              >
+                 🕊️ Pledges
+              </button>
+              <button 
+                type="button"
+                onClick={() => { hapticTap(); setCommunityTab('reports'); }}
+                className={`px-4 py-2 text-[10px] uppercase tracking-wider font-black rounded-xl transition-all ${communityTab === 'reports' ? 'bg-[#135bec] text-white shadow' : 'text-slate-500'}`}
+              >
+                 📢 Observations
+              </button>
+           </div>
+        </div>
+
+        {communityTab === 'pledges' ? (
+          <div className="space-y-8 animate-in fade-in duration-300">
+             <p className="text-lg leading-relaxed font-bold text-slate-600 dark:text-slate-300">
+                Join thousands of Kenyan citizens committing to peace, local support, and fact-checking during devolution. Submit your own vow of peace on our digital interactive wall:
+             </p>
+
+             {/* Sticky notes Wall */}
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-2">
+                {pledges.map((pledge, pIdx) => {
+                  const paperColors = [
+                    'bg-amber-50/70 text-amber-950 border-amber-200 rotate-1',
+                    'bg-rose-50/70 text-rose-950 border-rose-200 -rotate-1',
+                    'bg-blue-50/70 text-blue-950 border-blue-200 rotate-2',
+                    'bg-emerald-50/70 text-emerald-950 border-emerald-200 -rotate-2',
+                    'bg-violet-50/70 text-violet-950 border-violet-200 rotate-1'
+                  ];
+                  const paperClass = paperColors[pIdx % paperColors.length];
+                  return (
+                     <div key={pledge.id} className={`p-6 rounded-3xl border shadow-sm flex flex-col justify-between min-h-[140px] transform transition-transform hover:scale-102 ${paperClass}`}>
+                        <p className="text-sm font-bold italic leading-snug break-words">
+                           "{pledge.pledgeText}"
+                        </p>
+                        <div className="mt-4 pt-2 border-t border-black/5 flex items-center justify-between text-[11px] font-black uppercase tracking-tight opacity-75">
+                           <span>{pledge.name}</span>
+                           <span className="font-mono">{pledge.county}</span>
+                        </div>
+                     </div>
+                  );
+                })}
+             </div>
+
+             {/* Pledge Forms */}
+             <form onSubmit={handleSubmitPledge} className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-100 dark:border-slate-805 space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#135bec]">Pin your Pledge of Peace</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Name / Alias</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="e.g. John Kamau" 
+                        value={newPledgeName}
+                        onChange={(e) => setNewPledgeName(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-3.5 rounded-xl font-bold font-sans dark:text-white outline-none focus:border-[#135bec]"
+                      />
+                   </div>
+                   <div className="space-y-1">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Your County</label>
+                      <select 
+                        value={newPledgeCounty}
+                        onChange={(e) => setNewPledgeCounty(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-3.5 rounded-xl font-bold font-sans dark:text-white outline-none"
+                      >
+                         {KENYAN_COUNTIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                   </div>
+                </div>
+
+                <div className="space-y-1">
+                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Select or Write Pledge Text</label>
+                   <div className="flex flex-wrap gap-2 mb-2">
+                      {[
+                        "I pledge to help seniors and vulnerable walk to stations safely.",
+                        "I pledge to promote peace and support facts in my ward.",
+                        "I pledge to stand for transparency and support devolution."
+                      ].map((preset, prId) => (
+                         <button 
+                           key={prId} 
+                           type="button" 
+                           onClick={() => { hapticTap(); setNewPledgeText(preset); }}
+                           className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all ${newPledgeText === preset ? 'bg-amber-500 text-white border-amber-600 shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'}`}
+                         >
+                            Option {prId + 1}
+                         </button>
+                      ))}
+                   </div>
+                   <textarea 
+                     required
+                     value={newPledgeText}
+                     onChange={(e) => setNewPledgeText(e.target.value)}
+                     className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-4 rounded-xl font-bold font-sans text-base dark:text-white outline-none focus:border-[#135bec]"
+                     rows={2}
+                   />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingPledge}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black py-4.5 rounded-2xl border-b-4 border-blue-950 active:scale-95 transition-all text-sm uppercase"
+                >
+                   {isSubmittingPledge ? 'Submitting Commitments...' : 'Post Pin to Peace Wall'}
+                </button>
+             </form>
+          </div>
+        ) : (
+          <div className="space-y-8 animate-in fade-in duration-300">
+             <p className="text-lg leading-relaxed font-bold text-slate-600 dark:text-slate-300">
+                A crowdsourced, citizen observation platform allowing users to submit transparent reports about voter education sessions, peacemaker chief barazas, or functional KIEMS kit demonstrations around their constituency:
+             </p>
+
+             {/* Reports List */}
+             <div className="space-y-4">
+                {reports.map((report) => (
+                  <div key={report.id} className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row gap-6 hover:shadow-md transition-shadow">
+                     {report.image && (
+                        <div className="w-full sm:w-40 h-32 rounded-2xl overflow-hidden shrink-0 border border-slate-200/50 bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                           <img src={report.image} className="w-full h-full object-cover" alt={report.title} referrerPolicy="no-referrer" />
+                        </div>
+                     )}
+                     <div className="space-y-3 flex-1">
+                        <div className="flex justify-between items-center flex-wrap gap-2">
+                           <div className="flex items-center gap-2">
+                              <span className="font-black text-[10px] uppercase tracking-wider text-[#135bec] dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1 rounded-xl">
+                                 {report.category}
+                              </span>
+                              <span className="font-mono text-xs font-black text-slate-400">
+                                 {report.county} County
+                              </span>
+                           </div>
+
+                           {report.status === 'VERIFIED' ? (
+                              <span className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[9px] font-black px-2.5 py-1 rounded-full border border-emerald-300/30">
+                                 ✓ VERIFIED BY OBSERVATION DESK
+                              </span>
+                           ) : (
+                              <span className="inline-flex items-center gap-1 bg-amber-100 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400 text-[9px] font-black px-2.5 py-1 rounded-full border border-amber-300/30">
+                                 ⏱️ PENDING VERIFICATION Check
+                              </span>
+                           )}
+                        </div>
+
+                        <h4 className="text-xl font-black text-slate-950 dark:text-white leading-tight">
+                           {report.title}
+                        </h4>
+
+                        <p className="text-base text-slate-505 dark:text-slate-350 font-bold leading-relaxed">
+                           {report.description}
+                        </p>
+
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                           Reported on: {new Date(report.timestamp).toLocaleDateString()} at {new Date(report.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                     </div>
+                  </div>
+                ))}
+             </div>
+
+             {/* Submit form */}
+             <form onSubmit={handleSubmitReport} className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#135bec]">Submit Local Community Observation</span>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                   <div className="space-y-1 sm:col-span-2">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Observation Short Title</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="e.g. Elderly Voters Drive Success at Ward Hall" 
+                        value={newReportTitle}
+                        onChange={(e) => setNewReportTitle(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-3.5 rounded-xl font-bold dark:text-white outline-none focus:border-[#135bec]"
+                      />
+                   </div>
+                   <div className="space-y-1">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">County Area</label>
+                      <select 
+                        value={newReportCounty}
+                        onChange={(e) => setNewReportCounty(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-3.5 rounded-xl font-bold dark:text-white outline-none"
+                      >
+                         {KENYAN_COUNTIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Category of Event</label>
+                      <select 
+                        value={newReportCategory}
+                        onChange={(e) => setNewReportCategory(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-3.5 rounded-xl font-bold dark:text-white outline-none"
+                      >
+                         <option value="Voter Education">Voter Education Session</option>
+                         <option value="Peace & Accord">Peace & Accord chief baraza</option>
+                         <option value="IEBC Live Check">KIEMS process demonstration</option>
+                         <option value="Elders Support">Assisting elders support</option>
+                      </select>
+                   </div>
+                   <div className="space-y-1">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Add Observational Photo (Touch / Click)</label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => e.target.files && handleImageUpload(e.target.files[0])}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-2 rounded-xl text-xs text-slate-405 dark:text-slate-350"
+                      />
+                   </div>
+                </div>
+
+                <div className="space-y-1">
+                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Details of Observation</label>
+                   <textarea 
+                     required
+                     value={newReportDesc}
+                     onChange={(e) => setNewReportDesc(e.target.value)}
+                     placeholder="Briefly describe what was observed... (e.g. Local village mobilizers and community workers successfully explained voting booth procedures and translated the materials into localized languages for elders)."
+                     className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-4 rounded-xl font-bold text-base dark:text-white outline-none focus:border-[#135bec]"
+                     rows={3}
+                   />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingReport}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black py-4 rounded-2xl border-b-4 border-blue-955 active:scale-95 transition-all text-sm uppercase"
+                >
+                   {isSubmittingReport ? 'Submitting Report...' : 'Add Community Observation'}
+                </button>
+             </form>
+          </div>
+        )}
+
       </section>
 
       <div className="grid grid-cols-1 gap-6">
