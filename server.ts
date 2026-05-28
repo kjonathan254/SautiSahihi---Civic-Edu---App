@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
+import fs from "fs";
 
 async function startServer() {
   const app = express();
@@ -10,7 +11,49 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // --- In-Memory Data Store (Simulating a Database) ---
+  const PLEDGES_FILE = path.join(process.cwd(), "data_pledges.json");
+  const REPORTS_FILE = path.join(process.cwd(), "data_reports.json");
+
+  let initialPledges = [
+    { id: 1, name: "Mercy Wanjiku", county: "Nairobi", pledgeText: "I pledge to help my grandparents walk to their polling station safely.", timestamp: "2026-05-28T09:30:00Z" },
+    { id: 2, name: "John Kiprop", county: "Uasin Gishu", pledgeText: "I pledge to advocate for verified facts and peaceful election conduct in my ward.", timestamp: "2026-05-28T08:50:00Z" },
+    { id: 3, name: "Amina Juma", county: "Mombasa", pledgeText: "I pledge to participate in public budget planning and support clear resource distribution.", timestamp: "2026-05-28T08:10:00Z" }
+  ];
+
+  let initialReports = [
+    { id: 1, title: "Elder Voter Guide Session", county: "Nyeri", category: "Voter Education", description: "A successful chief baraza was organized with over 40 elder participants to explain the registration guidelines with translated brochures.", status: "VERIFIED", timestamp: "2026-05-28T09:00:00Z" },
+    { id: 2, title: "Peaceful Youth Dialogue", county: "Kisumu", category: "Peace & Accord", description: "Youth leaders gathered at Central Park to pledge peaceful support and support county cohesion.", status: "VERIFIED", timestamp: "2026-05-28T08:30:00Z" }
+  ];
+
+  if (fs.existsSync(PLEDGES_FILE)) {
+    try {
+      initialPledges = JSON.parse(fs.readFileSync(PLEDGES_FILE, "utf-8"));
+    } catch (e) {
+      console.error("Failed to parse pledges, using defaults:", e);
+    }
+  } else {
+    try {
+      fs.writeFileSync(PLEDGES_FILE, JSON.stringify(initialPledges, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Failed to write pledges file:", e);
+    }
+  }
+
+  if (fs.existsSync(REPORTS_FILE)) {
+    try {
+      initialReports = JSON.parse(fs.readFileSync(REPORTS_FILE, "utf-8"));
+    } catch (e) {
+      console.error("Failed to parse reports, using defaults:", e);
+    }
+  } else {
+    try {
+      fs.writeFileSync(REPORTS_FILE, JSON.stringify(initialReports, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Failed to write reports file:", e);
+    }
+  }
+
+  // --- In-Memory Data Store (Simulating a Database with persistence fallback) ---
   const data = {
     faqs: [
       { id: 1, question: "How do I register to vote?", answer: "Visit any IEBC constituency office with your original National ID or valid Passport. Registration is continuous.", visits: 120 },
@@ -26,15 +69,8 @@ async function startServer() {
     pollParticipation: 0,
     learnTopicViews: {} as Record<string, number>,
     assistantQueries: 0,
-    communityReports: [
-      { id: 1, title: "Elder Voter Guide Session", county: "Nyeri", category: "Voter Education", description: "A successful chief baraza was organized with over 40 elder participants to explain the registration guidelines with translated brochures.", status: "VERIFIED", timestamp: "2026-05-28T09:00:00Z" },
-      { id: 2, title: "Peaceful Youth Dialogue", county: "Kisumu", category: "Peace & Accord", description: "Youth leaders gathered at Central Park to pledge peaceful support and support county cohesion.", status: "VERIFIED", timestamp: "2026-05-28T08:30:00Z" }
-    ] as any[],
-    pledges: [
-      { id: 1, name: "Mercy Wanjiku", county: "Nairobi", pledgeText: "I pledge to help my grandparents walk to their polling station safely.", timestamp: "2026-05-28T09:30:00Z" },
-      { id: 2, name: "John Kiprop", county: "Uasin Gishu", pledgeText: "I pledge to advocate for verified facts and peaceful election conduct in my ward.", timestamp: "2026-05-28T08:50:00Z" },
-      { id: 3, name: "Amina Juma", county: "Mombasa", pledgeText: "I pledge to participate in public budget planning and support clear resource distribution.", timestamp: "2026-05-28T08:10:00Z" }
-    ] as any[]
+    communityReports: initialReports,
+    pledges: initialPledges
   };
 
   // --- API Routes ---
@@ -144,6 +180,11 @@ async function startServer() {
       timestamp: new Date().toISOString()
     };
     data.communityReports.push(newReport);
+    try {
+      fs.writeFileSync(REPORTS_FILE, JSON.stringify(data.communityReports, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Failed to write updated reports file", e);
+    }
     res.json({ success: true, report: newReport });
   });
 
@@ -151,6 +192,11 @@ async function startServer() {
     const report = data.communityReports.find((r: any) => r.id === parseInt(req.params.id));
     if (report) {
       report.status = "VERIFIED";
+      try {
+        fs.writeFileSync(REPORTS_FILE, JSON.stringify(data.communityReports, null, 2), "utf-8");
+      } catch (e) {
+        console.error("Failed to write updated verified reports file", e);
+      }
       res.json({ success: true, report });
     } else {
       res.status(404).json({ error: "Report not found" });
@@ -175,6 +221,11 @@ async function startServer() {
       timestamp: new Date().toISOString()
     };
     data.pledges.push(newPledge);
+    try {
+      fs.writeFileSync(PLEDGES_FILE, JSON.stringify(data.pledges, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Failed to write updated pledges file", e);
+    }
     res.json({ success: true, pledge: newPledge });
   });
 

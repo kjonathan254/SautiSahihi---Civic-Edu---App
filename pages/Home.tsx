@@ -448,7 +448,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
         {communityTab === 'pledges' ? (
           <div className="space-y-8 animate-in fade-in duration-300">
              <p className="text-lg leading-relaxed font-bold text-slate-600 dark:text-slate-300">
-                Join thousands of Kenyan citizens committing to peace, local support, and fact-checking during devolution. Submit your own vow of peace on our digital interactive wall:
+                Join thousands of Kenyan citizens committing to peace, local support, and fact-checking Before Elections, During Elections and After Elections. Submit your own vow of peace on our digital interactive wall:
              </p>
 
              {/* Sticky notes Wall */}
@@ -509,7 +509,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
                       {[
                         "I pledge to help seniors and vulnerable walk to stations safely.",
                         "I pledge to promote peace and support facts in my ward.",
-                        "I pledge to stand for transparency and support devolution."
+                        "I pledge to stand for transparency and support peaceful elections."
                       ].map((preset, prId) => (
                          <button 
                            key={prId} 
@@ -542,7 +542,7 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
         ) : (
           <div className="space-y-8 animate-in fade-in duration-300">
              <p className="text-lg leading-relaxed font-bold text-slate-600 dark:text-slate-300">
-                A crowdsourced, citizen observation platform allowing users to submit transparent reports about voter education sessions, peacemaker chief barazas, or functional KIEMS kit demonstrations around their constituency:
+                A crowdsourced, citizen observation platform allowing users to submit transparent reports about voter education sessions or peacemaker chief barazas around their constituency:
              </p>
 
              {/* Reports List */}
@@ -630,7 +630,6 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
                       >
                          <option value="Voter Education">Voter Education Session</option>
                          <option value="Peace & Accord">Peace & Accord chief baraza</option>
-                         <option value="IEBC Live Check">KIEMS process demonstration</option>
                          <option value="Elders Support">Assisting elders support</option>
                       </select>
                    </div>
