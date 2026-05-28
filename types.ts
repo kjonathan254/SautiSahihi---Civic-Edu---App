@@ -1,4 +1,4 @@
-export type AppLanguage = 'ENG' | 'KIS' | 'GIK' | 'DHO' | 'LUH';
+export type AppLanguage = 'ENG' | 'KIS' | 'GIK' | 'DHO' | 'LUH' | 'KAL' | 'KAM';
 export type Language = AppLanguage;
 
 export enum AppScreen {

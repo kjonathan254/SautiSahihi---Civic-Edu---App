@@ -201,6 +201,26 @@ export const LEARN_TOPICS: LearnTopic[] = [
     lastUpdated: 'Mar 2024',
     image: "/images/polling-day-checklist.webp",
     prompt: "A small kit containing a Kenyan ID, a water bottle, and a hat, ready for election day." 
+  },
+  {
+    id: 'public-participation',
+    title: 'Public Participation',
+    summary: 'Your right to speak on local county budgets and project plans.',
+    detailedContent: 'Under Kenyan law, the government cannot make big decisions or spend public money without asking you first. This is called Public Participation. County governments must hold open meetings where seniors and residents can attend, voice their opinions on project plans, and ensure local funds are spent on essential needs like clean water and healthcare.',
+    category: 'Civic Duty',
+    lastUpdated: 'May 2026',
+    image: '/images/public-participation.webp',
+    prompt: 'A respectful public assembly under an acacia tree in Kenya, with people discussing local development plans.'
+  },
+  {
+    id: 'office-of-mca',
+    title: 'The Office of the MCA',
+    summary: 'The leader closest to your home and how they serve you.',
+    detailedContent: 'A Member of County Assembly (MCA) is your direct link to the local government. They represent your ward, pass local laws, and watch over how your Governor spends county funds. If your local market needs lights, or if deep mud makes our village road impassable, your MCA is the first person you should speak to to get help.',
+    category: 'Devolution',
+    lastUpdated: 'May 2026',
+    image: '/images/office-of-mca.webp',
+    prompt: 'A helpful leader chatting with elders and community members in a modern local administration office in Kenya.'
   }
 ];
 
@@ -209,7 +229,9 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationSet> = {
   KIS: { home: "Nyumbani", welcome: "Karibu", tagline: "Uwasilishaji • Hadhi • Ukweli", connectBtn: "Unganisha", apiKeyDesc: "Pata Elimu ya Uraia.", factChecker: "Kihakiki", poll: "Upigaji", learn: "Elimu", assistant: "Msaidizi", settings: "Mipangilio", checkClaim: "Hakiki", uploadImage: "Pakia", verdict: "Uamuzi", explanation: "Maelezo", sources: "Vyanzo", shareWhatsApp: "Shiriki", voteNow: "Piga Kura", standing: "Hali", latestNews: "Habari", contactSupport: "Msaada", iebcLocator: "Tafuta", languageSelect: "Lugha" },
   GIK: { home: "Mucii", welcome: "Uhoro", tagline: "Utaũri • Gitiyo • Uma", connectBtn: "Hota", apiKeyDesc: "AI Studio.", factChecker: "Guthuthuria", poll: "Gwithuranira", learn: "Kwiruta", assistant: "Muteithia", settings: "Mabange", checkClaim: "Thuthuria", uploadImage: "Oya", verdict: "Utuĩro", explanation: "Utaũri", sources: "Sources", shareWhatsApp: "Heana", voteNow: "Ikia Kura", standing: "Standing", latestNews: "Mohoro", contactSupport: "Uteithio", iebcLocator: "Ofisi", languageSelect: "Language" },
   DHO: { home: "Pacho", welcome: "Donji", tagline: "Lero • Duong' • Adiera", connectBtn: "Kudore", apiKeyDesc: "AI Studio.", factChecker: "Nono", poll: "Yiero", learn: "Puonjruok", assistant: "Jakony", settings: "Chenro", checkClaim: "Nono", uploadImage: "Ket picha", verdict: "Ng'ado", explanation: "Lero", sources: "Sources", shareWhatsApp: "Oraye", voteNow: "Yier", standing: "Chung", latestNews: "Wache matuch", contactSupport: "Kony", iebcLocator: "Ofis", languageSelect: "Yier dhok" },
-  LUH: { home: "Enzu", welcome: "Mirembe", tagline: "Maelezo • Gitiyo • Tushili", connectBtn: "Ruma", apiKeyDesc: "AI Studio.", factChecker: "Londa", poll: "Kupaka", learn: "Khwiyega", assistant: "Omukonyi", settings: "Tsipangilio", checkClaim: "Londa", uploadImage: "Rira", verdict: "Isiamu", explanation: "Maelezo", sources: "Sources", shareWhatsApp: "Rumire", voteNow: "Kupaka", standing: "Standing", latestNews: "Mohoro", contactSupport: "Obukonyi", iebcLocator: "Ofisi", languageSelect: "Language" }
+  LUH: { home: "Enzu", welcome: "Mirembe", tagline: "Maelezo • Gitiyo • Tushili", connectBtn: "Ruma", apiKeyDesc: "AI Studio.", factChecker: "Londa", poll: "Kupaka", learn: "Khwiyega", assistant: "Omukonyi", settings: "Tsipangilio", checkClaim: "Londa", uploadImage: "Rira", verdict: "Isiamu", explanation: "Maelezo", sources: "Sources", shareWhatsApp: "Rumire", voteNow: "Kupaka", standing: "Standing", latestNews: "Mohoro", contactSupport: "Obukonyi", iebcLocator: "Ofisi", languageSelect: "Language" },
+  KAL: { home: "Kaga", welcome: "Chamgei", tagline: "Oret • Kitioyo • Iman", connectBtn: "Kuut", apiKeyDesc: "AI Studio.", factChecker: "Kiseer", poll: "Legeyet", learn: "Kinetgei", assistant: "Kajony", settings: "Mipangilio", checkClaim: "Seek", uploadImage: "Tuyet", verdict: "Kirorut", explanation: "Kiborut", sources: "Sources", shareWhatsApp: "Ira", voteNow: "Kias", standing: "Standing", latestNews: "Omonit", contactSupport: "Toretet", iebcLocator: "Ofisit", languageSelect: "Kutit" },
+  KAM: { home: "Musyi", welcome: "Wimuseo", tagline: "Uthianyu • Nduu • Uw'o", connectBtn: "Hota", apiKeyDesc: "AI Studio.", factChecker: "Kyalo", poll: "Usisya", learn: "Kwĩmanyĩsya", assistant: "Mutethi", settings: "Mũvangĩle", checkClaim: "Sisya", uploadImage: "Osa", verdict: "Utwi", explanation: "Uelesyo", sources: "Sources", shareWhatsApp: "Tuma", voteNow: "Kuna Kura", standing: "Standing", latestNews: "Ũvoo", contactSupport: "Ũtethyo", iebcLocator: "Ofisi", languageSelect: "Kĩthyomo" }
 };
 
 export const CIVIC_FAQS: Record<AppLanguage, { q: string, a: string }[]> = {
@@ -249,6 +271,18 @@ export const CIVIC_FAQS: Record<AppLanguage, { q: string, a: string }[]> = {
     {
       q: "Ndieyandikisa ruma?",
       a: "Dhia eyofisi ya IEBC ya constituency yenyu nende ID yinye ya lobi nende Pasipoti. Khweyandikisa khuli khwa makhinda kosi.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
+    }
+  ],
+  KAL: [
+    {
+      q: "Ngoi agerigei kora?",
+      a: "Wendi ofisit nebo IEBC nebo komasut neng'ung' asikuchorigei kora. Kuu kobendete kora hinda krata.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
+    }
+  ],
+  KAM: [
+    {
+      q: "Ndiandikithia kura ata?",
+      a: "Thiandiki ofisinĩ ya IEBC ya kĩsionĩ kyaku na kitambulisho kyaku kya nthĩ kana Pasipoti. Kwandĩkithya kura kũthiite na mbee mwaka w'onthe.\n\nSource:\nElections Act No. 24 of 2011\nSection 5"
     }
   ]
 };

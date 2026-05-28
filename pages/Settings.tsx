@@ -41,6 +41,8 @@ const Settings: React.FC<Props> = ({ lang, setLang, darkMode, setDarkMode, large
     { code: 'GIK', label: 'Gikuyu' },
     { code: 'DHO', label: 'Dholuo' },
     { code: 'LUH', label: 'Luhya' },
+    { code: 'KAL', label: 'Kalenjin' },
+    { code: 'KAM', label: 'Kamba' },
   ];
 
   const handleLanguageChange = async (code: AppLanguage) => {

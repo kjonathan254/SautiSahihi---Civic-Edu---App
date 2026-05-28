@@ -115,9 +115,9 @@ const Home: React.FC<Props> = ({ lang, t, onNavigate }) => {
     const isMorning = hours >= 5 && hours < 12;
     const isAfternoon = hours >= 12 && hours < 17;
     const greetings: Record<'morning' | 'afternoon' | 'evening', Record<AppLanguage, string>> = {
-      morning: { ENG: "Good Morning", KIS: "Habari za asubuhi", GIK: "Wia mwega", DHO: "Oyawore", LUH: "Busiere" },
-      afternoon: { ENG: "Good Afternoon", KIS: "Habari za mchana", GIK: "Muthenya mwega", DHO: "Osaore", LUH: "Obuire bulahi" },
-      evening: { ENG: "Good Evening", KIS: "Habari za jioni", GIK: "Hwai-ini mwega", DHO: "Odhiambo", LUH: "Mwabuka" }
+      morning: { ENG: "Good Morning", KIS: "Habari za asubuhi", GIK: "Wia mwega", DHO: "Oyawore", LUH: "Busiere", KAL: "Chamgei mising", KAM: "Wĩmũseo Nesa" },
+      afternoon: { ENG: "Good Afternoon", KIS: "Habari za mchana", GIK: "Muthenya mwega", DHO: "Osaore", LUH: "Obuire bulahi", KAL: "Chamgei", KAM: "Ũseo Nesa" },
+      evening: { ENG: "Good Evening", KIS: "Habari za jioni", GIK: "Hwai-ini mwega", DHO: "Odhiambo", LUH: "Mwabuka", KAL: "Chamgei", KAM: "Ũseo Mũno" }
     };
     const timeKey = isMorning ? 'morning' : (isAfternoon ? 'afternoon' : 'evening');
     return greetings[timeKey][lang] || greetings[timeKey]['ENG'];

@@ -81,7 +81,7 @@ const Analytics: React.FC<Props> = ({ lang, t }) => {
     } catch (e) {
       console.warn("Analytics: Using offline admin stats fallback:", e);
       setAdminStats({
-        languages: { ENG: 142, KIS: 218, GIK: 45, DHO: 32, LUH: 28 },
+        languages: { ENG: 142, KIS: 218, GIK: 45, DHO: 32, LUH: 28, KAL: 12, KAM: 18 },
         pollParticipation: 94,
         learnViews: { "kiems-kit": 52, "rights-senior": 84, "civic-peace": 41 },
         assistantQueries: 350,

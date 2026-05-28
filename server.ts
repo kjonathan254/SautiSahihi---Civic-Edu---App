@@ -22,7 +22,7 @@ async function startServer() {
     ],
     locationVisits: {} as Record<string, number>,
     factChecks: [] as any[],
-    languageStats: { ENG: 0, KIS: 0, GIK: 0, DHO: 0, LUH: 0 } as Record<string, number>,
+    languageStats: { ENG: 0, KIS: 0, GIK: 0, DHO: 0, LUH: 0, KAL: 0, KAM: 0 } as Record<string, number>,
     pollParticipation: 0,
     learnTopicViews: {} as Record<string, number>,
     assistantQueries: 0
